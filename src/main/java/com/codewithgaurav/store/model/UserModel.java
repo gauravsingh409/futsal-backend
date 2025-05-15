@@ -3,9 +3,9 @@ package com.codewithgaurav.store.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "users")
+@Document(collection = "user")
 
-public class User {
+public class UserModel {
 
    @Id
    private String id;
@@ -13,10 +13,10 @@ public class User {
    private String password;
 
    // constructor
-   public User() {
+   public UserModel() {
    }
 
-   public User(String username, String password) {
+   public UserModel(String username, String password) {
       this.username = username;
       this.password = password;
    }
