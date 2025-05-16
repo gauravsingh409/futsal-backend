@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.codewithgaurav.store.dto.FootsalAuth;
+import com.codewithgaurav.store.dto.FutsalDto;
 import com.codewithgaurav.store.model.FootsalModel;
+import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.repository.FootsalRepository;
 import com.codewithgaurav.store.services.JwtService;
 import com.codewithgaurav.store.validation.FutsalLoginGroup;
@@ -37,55 +38,43 @@ public class FootsalAuthController {
    }
 
    @PostMapping("/register") // become /api/auth/footsal/register
-   public ResponseEntity<?> registerFootsal(@Valid @RequestBody FootsalAuth request) {
-      Map<String, Object> response = new HashMap<>();
-      Map<String, Object> data = new HashMap<>();
-
+   public ResponseEntity<?> registerFootsal(@Valid @RequestBody FutsalDto request) {
       // Check if the username exists
       if (footsalRepository.findByUsername(request.getUsername()) != null) {
-         response.put("message", "Username already exists");
+         ApiResponse<Map<String, Object>> response = new ApiResponse<>("Username already exists",
+               409, "false");
          return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
       }
 
       FootsalModel footsal = new FootsalModel();
       footsal.setUsername(request.getUsername());
       footsal.setPassword(passwordEncoder.encode(request.getPassword()));
-      footsal.setContact_info(request.getContact_info());
-      footsal.setFootsal_name(request.getFootsal_name());
-      footsal.setRegistration_number(request.getRegistration_number());
-      footsal.setImage(request.getImage());
-      footsal.setPrice_per_hour(request.getPrice_per_hour());
       FootsalModel savedUser = footsalRepository.save(footsal);
 
       // Generate JWT token
       String token = jwtService.generateToken(savedUser.getUsername());
-
+      Map<String, Object> data = new HashMap<>();
+      data.put("id", savedUser.getId());
       data.put("username", savedUser.getUsername());
       data.put("token", token);
-      response.put("message", "Footsal registered successfully");
-      response.put("data", data);
-      response.put("status", 200);
+      ApiResponse<Map<String, Object>> response = new ApiResponse<>("User created successfully", 201, "true", data);
 
       return ResponseEntity.ok(response);
    }
 
    @PostMapping("/login")
-   public ResponseEntity<?> loginFootsal(@Validated(FutsalLoginGroup.class) @RequestBody FootsalAuth request) {
-      Map<String, Object> response = new HashMap<>();
-      Map<String, Object> data = new HashMap<>();
+   public ResponseEntity<?> loginFootsal(@Validated(FutsalLoginGroup.class) @RequestBody FutsalDto request) {
 
       // Find the user in the database
       FootsalModel footsal = footsalRepository.findByUsername(request.getUsername());
       if (footsal == null) {
-         response.put("message", "Cannot find the username");
-         response.put("status", 404);
+         ApiResponse<Map<String, Object>> response = new ApiResponse<>("user doesn't exists", 400, "false");
          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
       }
 
       // Verify password
       if (!passwordEncoder.matches(request.getPassword(), footsal.getPassword())) {
-         response.put("message", "Invalid password");
-         response.put("status", 401);
+         ApiResponse<Map<String, Object>> response = new ApiResponse<>("password incorrect", 401, "false");
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
       }
 
@@ -93,11 +82,11 @@ public class FootsalAuthController {
       String token = jwtService.generateToken(request.getUsername());
 
       // Return token
+      Map<String, Object> data = new HashMap<>();
       data.put("token", token);
-      data.put("username", request.getUsername());
-      response.put("message", "Login successful");
-      response.put("status", 200);
-      response.put("data", data);
+      data.put("id", footsal.getId());
+      data.put("username", footsal.getUsername());
+      ApiResponse<Map<String, Object>> response = new ApiResponse<>("Logged in successfully", 200, "true");
       return ResponseEntity.ok(response);
    }
 

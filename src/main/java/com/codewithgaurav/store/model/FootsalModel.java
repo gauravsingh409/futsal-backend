@@ -3,17 +3,14 @@ package com.codewithgaurav.store.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "captain")
+@Document(collection = "futsal_owner")
 public class FootsalModel {
    @Id
    private String id;
    private String username;
    private String password;
-   private String footsal_name;
-   private String registration_number;
-   private String price_per_hour;
-   private String contact_info;
-   private String image;
+   private String citizenship_number;
+   private String phone_no;
 
    // Getters and Setters
    public String getId() {
@@ -40,43 +37,19 @@ public class FootsalModel {
       this.password = password;
    }
 
-   public String getFootsal_name() {
-      return footsal_name;
+   public String getCitizenship_number() {
+      return citizenship_number;
    }
 
-   public void setFootsal_name(String footsal_name) {
-      this.footsal_name = footsal_name;
+   public void setCitizenship_number(String citizenship_number) {
+      this.citizenship_number = citizenship_number;
    }
 
-   public String getRegistration_number() {
-      return registration_number;
+   public String getPhone_no() {
+      return phone_no;
    }
 
-   public void setRegistration_number(String registration_number) {
-      this.registration_number = registration_number;
-   }
-
-   public String getPrice_per_hour() {
-      return price_per_hour;
-   }
-
-   public void setPrice_per_hour(String price_per_hour) {
-      this.price_per_hour = price_per_hour;
-   }
-
-   public String getContact_info() {
-      return contact_info;
-   }
-
-   public void setContact_info(String contact_info) {
-      this.contact_info = contact_info;
-   }
-
-   public String getImage() {
-      return image;
-   }
-
-   public void setImage(String image) {
-      this.image = image;
+   public void setPhone_no(String phone_no) {
+      this.phone_no = phone_no;
    }
 }

@@ -3,17 +3,32 @@ package com.codewithgaurav.store.payload;
 public class ApiResponse<T> {
    private String message;
    private int code;
+   private String success;
    private T data;
    private Object errors;
 
    public ApiResponse() {
    }
 
-   public ApiResponse(String message, int code, T data, Object errors) {
+   public ApiResponse(String message, int code, String success, T data, Object errors) {
       this.message = message;
       this.code = code;
+      this.success = success;
       this.data = data;
       this.errors = errors;
+   }
+
+   public ApiResponse(String message, int code, String success, T data) {
+      this.message = message;
+      this.code = code;
+      this.success = success;
+      this.data = data;
+   }
+
+   public ApiResponse(String message, int code, String success) {
+      this.message = message;
+      this.code = code;
+      this.success = success;
    }
 
    // Getters and setters
@@ -47,5 +62,13 @@ public class ApiResponse<T> {
 
    public void setErrors(Object errors) {
       this.errors = errors;
+   }
+
+   public String getSuccess() {
+      return success;
+   }
+
+   public void setSuccess(String success) {
+      this.success = success;
    }
 }
