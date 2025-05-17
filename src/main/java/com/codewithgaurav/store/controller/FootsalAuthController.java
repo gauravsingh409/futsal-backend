@@ -18,8 +18,7 @@ import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.repository.FootsalRepository;
 import com.codewithgaurav.store.services.JwtService;
 import com.codewithgaurav.store.validation.FutsalLoginGroup;
-
-import jakarta.validation.Valid;
+import com.codewithgaurav.store.validation.FutsalRegisterGroup;
 
 @RestController
 @RequestMapping("/api/auth/footsal")
@@ -38,7 +37,7 @@ public class FootsalAuthController {
    }
 
    @PostMapping("/register") // become /api/auth/footsal/register
-   public ResponseEntity<?> registerFootsal(@Valid @RequestBody FutsalDto request) {
+   public ResponseEntity<?> registerFootsal(@Validated(FutsalRegisterGroup.class) @RequestBody FutsalDto request) {
       // Check if the username exists
       if (footsalRepository.findByUsername(request.getUsername()) != null) {
          ApiResponse<Map<String, Object>> response = new ApiResponse<>("Username already exists",
