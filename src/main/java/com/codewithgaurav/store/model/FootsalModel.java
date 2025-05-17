@@ -1,82 +1,123 @@
 package com.codewithgaurav.store.model;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "captain")
+@Document(collection = "owner")
 public class FootsalModel {
-   @Id
-   private String id;
-   private String username;
-   private String password;
-   private String footsal_name;
-   private String registration_number;
-   private String price_per_hour;
-   private String contact_info;
-   private String image;
+    @Id
+    private String id;
+    private String username;
+    private String password;
+    private String citizenshipNumber;
+    private String phoneNo;
 
-   // Getters and Setters
-   public String getId() {
-      return id;
-   }
+    // Additional Details
+    private String fullName;
+    private String email;
+    private Address address; // Embedded document
+    private LocalDate dateOfBirth; // Using LocalDate for DOB
+    private String emergencyContact;
+    private List<BankAccount> bankAccounts; // List of embedded docs
+    private String profileImageUrl;
 
-   public void setId(String id) {
-      this.id = id;
-   }
+    // Getters and Setters
+    public String getId() {
+        return id;
+    }
 
-   public String getUsername() {
-      return username;
-   }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-   public void setUsername(String username) {
-      this.username = username;
-   }
+    public String getUsername() {
+        return username;
+    }
 
-   public String getPassword() {
-      return password;
-   }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-   public void setPassword(String password) {
-      this.password = password;
-   }
+    public String getPassword() {
+        return password;
+    }
 
-   public String getFootsal_name() {
-      return footsal_name;
-   }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-   public void setFootsal_name(String footsal_name) {
-      this.footsal_name = footsal_name;
-   }
+    public String getCitizenship_number() {
+        return citizenshipNumber;
+    }
 
-   public String getRegistration_number() {
-      return registration_number;
-   }
+    public void setCitizenship_number(String citizenshipNumber) {
+        this.citizenshipNumber = citizenshipNumber;
+    }
 
-   public void setRegistration_number(String registration_number) {
-      this.registration_number = registration_number;
-   }
+    public String getphoneNo() {
+        return phoneNo;
+    }
 
-   public String getPrice_per_hour() {
-      return price_per_hour;
-   }
+    public void setphoneNo(String phoneNo) {
+        this.phoneNo = phoneNo;
+    }
 
-   public void setPrice_per_hour(String price_per_hour) {
-      this.price_per_hour = price_per_hour;
-   }
+    public String getFullName() {
+        return fullName;
+    }
 
-   public String getContact_info() {
-      return contact_info;
-   }
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 
-   public void setContact_info(String contact_info) {
-      this.contact_info = contact_info;
-   }
+    public String getEmail() {
+        return email;
+    }
 
-   public String getImage() {
-      return image;
-   }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-   public void setImage(String image) {
-      this.image = image;
-   }
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getEmergencyContact() {
+        return emergencyContact;
+    }
+
+    public void setEmergencyContact(String emergencyContact) {
+        this.emergencyContact = emergencyContact;
+    }
+
+    public List<BankAccount> getBankAccounts() {
+        return bankAccounts;
+    }
+
+    public void setBankAccounts(List<BankAccount> bankAccounts) {
+        this.bankAccounts = bankAccounts;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
 }

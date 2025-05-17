@@ -54,11 +54,11 @@ public class GlobalExceptionHandler {
 
          errors.computeIfAbsent(error.getField(), key -> new ArrayList<>()).add(error.getDefaultMessage());
       }
-
       ApiResponse<Object> response = new ApiResponse<>(
             "Validation failed",
             400,
-            null,
+            false,
+            new HashMap<>(),
             errors);
 
       return ResponseEntity.badRequest().body(response);
