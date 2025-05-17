@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
       ApiResponse<Object> response = new ApiResponse<>(
             "Validation failed",
             400,
-            "false",
+            false,
             new HashMap<>(),
             errors);
 

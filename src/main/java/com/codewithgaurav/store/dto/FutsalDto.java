@@ -25,15 +25,15 @@ public class FutsalDto {
             FutsalLoginGroup.class, FutsalRegisterGroup.class })
     private String password;
 
-    @NotBlank(message = "Citizenship number is required", groups = { FutsalLoginGroup.class,
+    @NotBlank(message = "Citizenship number is required", groups = {
             FutsalRegisterGroup.class })
     @Pattern(regexp = "^[A-Za-z0-9\\-]+$", message = "Citizenship number can only contain letters, numbers, and hyphens", groups = {
-            FutsalLoginGroup.class, FutsalRegisterGroup.class })
+            FutsalRegisterGroup.class })
     private String citizenshipNumber;
 
-    @NotBlank(message = "Phone number is required", groups = { FutsalLoginGroup.class,
+    @NotBlank(message = "Phone number is required", groups = {
             FutsalRegisterGroup.class })
-    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits", groups = { FutsalLoginGroup.class,
+    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits", groups = {
             FutsalRegisterGroup.class })
     private String phone_no;
 

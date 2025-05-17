@@ -3,14 +3,14 @@ package com.codewithgaurav.store.payload;
 public class ApiResponse<T> {
    private String message;
    private int code;
-   private String success;
+   private boolean success;
    private T data;
    private Object errors;
 
    public ApiResponse() {
    }
 
-   public ApiResponse(String message, int code, String success, T data, Object errors) {
+   public ApiResponse(String message, int code, boolean success, T data, Object errors) {
       this.message = message;
       this.code = code;
       this.success = success;
@@ -18,14 +18,14 @@ public class ApiResponse<T> {
       this.errors = errors;
    }
 
-   public ApiResponse(String message, int code, String success, T data) {
+   public ApiResponse(String message, int code, boolean success, T data) {
       this.message = message;
       this.code = code;
       this.success = success;
       this.data = data;
    }
 
-   public ApiResponse(String message, int code, String success) {
+   public ApiResponse(String message, int code, boolean success) {
       this.message = message;
       this.code = code;
       this.success = success;
@@ -64,11 +64,11 @@ public class ApiResponse<T> {
       this.errors = errors;
    }
 
-   public String getSuccess() {
+   public boolean getSuccess() {
       return success;
    }
 
-   public void setSuccess(String success) {
+   public void setSuccess(boolean success) {
       this.success = success;
    }
 }

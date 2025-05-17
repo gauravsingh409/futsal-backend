@@ -41,7 +41,7 @@ public class FootsalAuthController {
       // Check if the username exists
       if (footsalRepository.findByUsername(request.getUsername()) != null) {
          ApiResponse<Map<String, Object>> response = new ApiResponse<>("Username already exists",
-               409, "false");
+               409, false);
          return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
       }
 
@@ -56,7 +56,7 @@ public class FootsalAuthController {
       data.put("id", savedUser.getId());
       data.put("username", savedUser.getUsername());
       data.put("token", token);
-      ApiResponse<Map<String, Object>> response = new ApiResponse<>("User created successfully", 201, "true", data);
+      ApiResponse<Map<String, Object>> response = new ApiResponse<>("User created successfully", 201, true, data);
 
       return ResponseEntity.ok(response);
    }
@@ -67,13 +67,13 @@ public class FootsalAuthController {
       // Find the user in the database
       FootsalModel footsal = footsalRepository.findByUsername(request.getUsername());
       if (footsal == null) {
-         ApiResponse<Map<String, Object>> response = new ApiResponse<>("user doesn't exists", 400, "false");
+         ApiResponse<Map<String, Object>> response = new ApiResponse<>("user doesn't exists", 400, false);
          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
       }
 
       // Verify password
       if (!passwordEncoder.matches(request.getPassword(), footsal.getPassword())) {
-         ApiResponse<Map<String, Object>> response = new ApiResponse<>("password incorrect", 401, "false");
+         ApiResponse<Map<String, Object>> response = new ApiResponse<>("password incorrect", 401, false);
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
       }
 
@@ -85,7 +85,7 @@ public class FootsalAuthController {
       data.put("token", token);
       data.put("id", footsal.getId());
       data.put("username", footsal.getUsername());
-      ApiResponse<Map<String, Object>> response = new ApiResponse<>("Logged in successfully", 200, "true");
+      ApiResponse<Map<String, Object>> response = new ApiResponse<>("Logged in successfully", 200, true, data);
       return ResponseEntity.ok(response);
    }
 
