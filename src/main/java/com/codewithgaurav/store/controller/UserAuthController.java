@@ -93,7 +93,7 @@ public class UserAuthController {
         }
 
         // Generate JWT token
-        String token = jwtservice.generateToken(userAuthDTO.getUsername());
+        String token = jwtservice.generateToken(existingUserModel.getUsername(), existingUserModel.getId());
 
         // Return Token
 

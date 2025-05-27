@@ -7,6 +7,7 @@ import jakarta.validation.constraints.*;
 
 public class FutsalDto {
 
+    // username
     @NotBlank(message = "Username field is missing", groups = { FutsalLoginGroup.class, FutsalRegisterGroup.class })
     @Size(min = 5, max = 20, message = "Username must be between 5 and 20 characters", groups = {
             FutsalLoginGroup.class,
@@ -15,6 +16,7 @@ public class FutsalDto {
             FutsalLoginGroup.class, FutsalRegisterGroup.class })
     private String username;
 
+    // password
     @NotBlank(message = "Password field is missing", groups = {
             FutsalLoginGroup.class,
             FutsalRegisterGroup.class })
@@ -25,12 +27,14 @@ public class FutsalDto {
             FutsalLoginGroup.class, FutsalRegisterGroup.class })
     private String password;
 
+    // citizenship number
     @NotBlank(message = "Citizenship number is required", groups = {
             FutsalRegisterGroup.class })
     @Pattern(regexp = "^[A-Za-z0-9\\-]+$", message = "Citizenship number can only contain letters, numbers, and hyphens", groups = {
             FutsalRegisterGroup.class })
     private String citizenshipNumber;
 
+    // phone number
     @NotBlank(message = "Phone number is required", groups = {
             FutsalRegisterGroup.class })
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits", groups = {
