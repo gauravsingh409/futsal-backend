@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codewithgaurav.store.dto.FutsalDto;
-import com.codewithgaurav.store.model.FootsalModel;
+import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.repository.FootsalRepository;
 import com.codewithgaurav.store.services.JwtService;
@@ -21,7 +21,7 @@ import com.codewithgaurav.store.validation.FutsalLoginGroup;
 import com.codewithgaurav.store.validation.FutsalRegisterGroup;
 
 @RestController
-@RequestMapping("/api/auth/footsal")
+@RequestMapping("/api/auth/futsal")
 public class FootsalAuthController {
 
    private final FootsalRepository footsalRepository;
@@ -45,13 +45,15 @@ public class FootsalAuthController {
          return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
       }
 
-      FootsalModel footsal = new FootsalModel();
+      OwnerModel footsal = new OwnerModel();
       footsal.setUsername(request.getUsername());
       footsal.setPassword(passwordEncoder.encode(request.getPassword()));
-      FootsalModel savedUser = footsalRepository.save(footsal);
+      footsal.setCitizenship_number(request.getCitizenshipNumber());
+      footsal.setphoneNo(request.getPhone_no());
+      OwnerModel savedUser = footsalRepository.save(footsal);
 
       // Generate JWT token
-      String token = jwtService.generateToken(savedUser.getUsername());
+      String token = jwtService.generateToken(savedUser.getUsername(), savedUser.getId());
       Map<String, Object> data = new HashMap<>();
       data.put("id", savedUser.getId());
       data.put("username", savedUser.getUsername());
@@ -65,7 +67,7 @@ public class FootsalAuthController {
    public ResponseEntity<?> loginFootsal(@Validated(FutsalLoginGroup.class) @RequestBody FutsalDto request) {
 
       // Find the user in the database
-      FootsalModel footsal = footsalRepository.findByUsername(request.getUsername());
+      OwnerModel footsal = footsalRepository.findByUsername(request.getUsername());
       if (footsal == null) {
          ApiResponse<Map<String, Object>> response = new ApiResponse<>("user doesn't exists", 400, false);
          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
@@ -78,7 +80,7 @@ public class FootsalAuthController {
       }
 
       // Generate JWT token
-      String token = jwtService.generateToken(request.getUsername());
+      String token = jwtService.generateToken(footsal.getUsername(), footsal.getId());
 
       // Return token
       Map<String, Object> data = new HashMap<>();

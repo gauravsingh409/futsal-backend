@@ -1,10 +1,22 @@
 package com.codewithgaurav.store.model;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class Address {
+
+   @NotBlank(message = "Street is required")
    private String street;
+
+   @NotBlank(message = "City is required")
    private String city;
+
+   @NotBlank(message = "Province is required")
    private String province;
+
+   @NotBlank(message = "Country is required")
    private String country;
+
+   @NotBlank(message = "Postal code is required")
    private String postalCode;
 
    // Getter for street
@@ -55,5 +67,16 @@ public class Address {
    // Setter for postalCode
    public void setPostalCode(String postalCode) {
       this.postalCode = postalCode;
+   }
+
+   @Override
+   public String toString() {
+      return "Address{" +
+            "street='" + street + '\'' +
+            ", city='" + city + '\'' +
+            ", province='" + province + '\'' +
+            ", country='" + country + '\'' +
+            ", postalCode='" + postalCode + '\'' +
+            '}';
    }
 }
