@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.codewithgaurav.store.dto.FutsalDto;
 import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.repository.FootsalRepository;
@@ -36,7 +35,7 @@ public class FootsalAuthController {
    }
 
    @PostMapping("/register") // become /api/auth/futsal/register
-   public ResponseEntity<?> registerFutsal(@Validated(UserValidation.FutsalRegisterGroup.class) @RequestBody FutsalDto request) {
+   public ResponseEntity<?> registerFutsal(@Validated(UserValidation.FutsalRegisterGroup.class) @RequestBody OwnerModel request) {
       // Check if the username exists
       if (footsalRepository.findByUsername(request.getUsername()) != null) {
          ApiResponse<Map<String, Object>> response = new ApiResponse<>("Username already exists",
@@ -47,8 +46,8 @@ public class FootsalAuthController {
       OwnerModel footsal = new OwnerModel();
       footsal.setUsername(request.getUsername());
       footsal.setPassword(passwordEncoder.encode(request.getPassword()));
-      footsal.setCitizenship_number(request.getCitizenshipNumber());
-      footsal.setphoneNo(request.getPhone_no());
+      footsal.setCitizenship_number(request.getCitizenship_number());
+      footsal.setPhone_no(request.getPhone_no());
       OwnerModel savedUser = footsalRepository.save(footsal);
 
       // Generate JWT token
@@ -63,7 +62,7 @@ public class FootsalAuthController {
    }
 
    @PostMapping("/login")
-   public ResponseEntity<?> loginFootsal(@Validated(UserValidation.FutsalLoginGroup.class) @RequestBody FutsalDto request) {
+   public ResponseEntity<?> loginFootsal(@Validated(UserValidation.FutsalLoginGroup.class) @RequestBody OwnerModel request) {
 
       // Find the user in the database
       OwnerModel footsal = footsalRepository.findByUsername(request.getUsername());

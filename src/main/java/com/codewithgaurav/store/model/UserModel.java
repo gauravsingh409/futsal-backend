@@ -1,6 +1,7 @@
 package com.codewithgaurav.store.model;
 
 import com.codewithgaurav.store.validation.UserValidation;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,6 +16,7 @@ public class UserModel {
    @NotBlank(message = "Username is required", groups = {UserValidation.UserRegisterGroup.class, UserValidation.UserLoginGroup.class})
    private String username;
 
+   @JsonIgnore
    @NotBlank(message = "Password is required", groups = {UserValidation.UserLoginGroup.class, UserValidation.UserRegisterGroup.class})
    @Size(min = 6, message = "Password must be at least 6 characters")
    private String password;

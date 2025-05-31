@@ -85,21 +85,14 @@ public class CompleteProfileController {
                 throw new RuntimeException(e.getMessage());
             }
 
-            // ✅ Set the profile image path before saving to DB
+            //  Set the profile image path before saving to DB
             String imageUrl = "/uploads/owners/" + fileName; // This should be a relative path
             request.setProfileImageUrl(imageUrl);
 
-            // ✅ Save updated data to DB
+            //  Save updated data to DB
             OwnerModel updatedOwner = service.updateOwnerDetails(id, request);
 
-            // Convert to JSON to return
-            String ownerJson = objectMapper.writeValueAsString(updatedOwner);
-
-            return ResponseEntity.ok().body(ownerJson);
-
-        } catch (JsonProcessingException e) {
-            logger.error("Failed to process profile completion", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>("Error processing JSON", 500, false));
+            return ResponseEntity.ok().body(new ApiResponse<>("Profile update successfully", 200, true, updatedOwner));
 
         } catch (io.jsonwebtoken.ExpiredJwtException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Token expired", 401, false));
@@ -144,13 +137,7 @@ public class CompleteProfileController {
         }
         request.setProfile_picture("/uploads/users/" + fileName);
 
-        UserModel updateUser = service.updateUserProfile(id,request);
-        System.out.println(updateUser);
-
-//        String userJson = objectMapper.writeValueAsString(updateUser);
-
-
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("Good", 201, false));
+        UserModel updateUser = service.updateUserProfile(id, request);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("Profile updates successfully", 200, true, updateUser));
     }
-
 }
