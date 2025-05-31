@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 
+import com.codewithgaurav.store.model.UserModel;
+import com.codewithgaurav.store.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.services.JwtService;
-import com.codewithgaurav.store.services.OwnerCompleteProfileService;
-import com.codewithgaurav.store.validation.OwnerProfileCompleteGroup;
+import com.codewithgaurav.store.services.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,7 +37,7 @@ public class CompleteProfileController {
 
 
     @Autowired
-    OwnerCompleteProfileService service;
+    UserService service;
 
     @Autowired
     JwtService jwtService;
@@ -46,7 +47,7 @@ public class CompleteProfileController {
 
     @SuppressWarnings("unused")
     @PutMapping(value = "/owner", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> ownerCompleteProfile(@RequestPart("data") @Validated(OwnerProfileCompleteGroup.class) OwnerModel request, @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> ownerCompleteProfile(@RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) OwnerModel request, @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
 
         try {
             String authHeader = httpRequest.getHeader("Authorization");
@@ -84,21 +85,14 @@ public class CompleteProfileController {
                 throw new RuntimeException(e.getMessage());
             }
 
-            // ✅ Set the profile image path before saving to DB
+            //  Set the profile image path before saving to DB
             String imageUrl = "/uploads/owners/" + fileName; // This should be a relative path
             request.setProfileImageUrl(imageUrl);
 
-            // ✅ Save updated data to DB
+            //  Save updated data to DB
             OwnerModel updatedOwner = service.updateOwnerDetails(id, request);
 
-            // Convert to JSON to return
-            String ownerJson = objectMapper.writeValueAsString(updatedOwner);
-
-            return ResponseEntity.ok().body(ownerJson);
-
-        } catch (JsonProcessingException e) {
-            logger.error("Failed to process profile completion", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>("Error processing JSON", 500, false));
+            return ResponseEntity.ok().body(new ApiResponse<>("Profile update successfully", 200, true, updatedOwner));
 
         } catch (io.jsonwebtoken.ExpiredJwtException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Token expired", 401, false));
@@ -108,4 +102,42 @@ public class CompleteProfileController {
         }
     }
 
+    @PutMapping(value = "/user", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> userCompleteProfile(@RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) UserModel request, @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
+        String authHeader = httpRequest.getHeader("Authorization");
+        // check if token is present
+        if (authHeader == null || !authHeader.startsWith("Bearer")) {
+            ApiResponse<Map<String, Object>> response = new ApiResponse<>("Token not found", 401, false);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        String token = authHeader.substring(7);
+        String id = jwtService.extractId(token);
+        String originalFilename = photos.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String fileName = UUID.randomUUID() + fileExtension;
+        Path uploadPath = Paths.get(System.getProperty("user.dir"), "uploads", "users");
+
+        try {
+            Files.createDirectories(uploadPath);
+        } catch (IOException e) {
+            ApiResponse<Map<String, Object>> response = new ApiResponse<>(e.getMessage(), 401, false);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        File destination = new File(uploadPath.toFile(), fileName);
+        try {
+            photos.transferTo(destination);
+        } catch (IOException e) {
+            ApiResponse<Map<String, Object>> response = new ApiResponse<>(e.getMessage(), 400, false);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        request.setProfile_picture("/uploads/users/" + fileName);
+
+        UserModel updateUser = service.updateUserProfile(id, request);
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("Profile updates successfully", 200, true, updateUser));
+    }
 }

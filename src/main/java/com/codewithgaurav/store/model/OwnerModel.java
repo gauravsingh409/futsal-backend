@@ -3,47 +3,71 @@ package com.codewithgaurav.store.model;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.codewithgaurav.store.validation.UserValidation;
+import jakarta.validation.constraints.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import com.codewithgaurav.store.validation.OwnerProfileCompleteGroup;
-
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 @Document(collection = "owner")
 public class OwnerModel {
     @Id
     private String id;
 
+    @NotBlank(message = "Username field is missing", groups = {UserValidation.FutsalLoginGroup.class, UserValidation.FutsalRegisterGroup.class})
+    @Size(min = 5, max = 20, message = "Username must be between 5 and 20 characters", groups = {
+            UserValidation.FutsalLoginGroup.class,
+            UserValidation.FutsalRegisterGroup.class})
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers, and underscores", groups = {
+            UserValidation.FutsalLoginGroup.class, UserValidation.FutsalRegisterGroup.class})
     private String username;
+
+
+    @NotBlank(message = "Password field is missing", groups = {
+            UserValidation.FutsalLoginGroup.class,
+            UserValidation.FutsalRegisterGroup.class})
+    @Size(min = 6, message = "Password must be at least 6 characters long", groups = {
+            UserValidation.FutsalLoginGroup.class,
+            UserValidation.FutsalRegisterGroup.class})
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$", message = "Password must contain uppercase, lowercase, number, and special character", groups = {
+            UserValidation.FutsalLoginGroup.class, UserValidation.FutsalRegisterGroup.class})
     private String password;
-    private String citizenshipNumber;
-    private String phoneNo;
+
+    @NotBlank(message = "Citizenship number is required", groups = {
+            UserValidation.FutsalRegisterGroup.class})
+    @Pattern(regexp = "^[A-Za-z0-9\\-]+$", message = "Citizenship number can only contain letters, numbers, and hyphens", groups = {
+            UserValidation.FutsalRegisterGroup.class})
+    private String citizenship_number;
+
+
+    @NotBlank(message = "Phone number is required", groups = {
+            UserValidation.FutsalRegisterGroup.class})
+    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits", groups = {
+            UserValidation.FutsalRegisterGroup.class})
+    private String phone_no;
 
     // Additional Details
-    @NotBlank(message = "Fullname is required", groups = { OwnerProfileCompleteGroup.class })
+    @NotBlank(message = "Fullname is required", groups = {UserValidation.OwnerProfileCompleteGroup.class})
     private String fullName;
 
-    @NotBlank(message = "Email is required", groups = { OwnerProfileCompleteGroup.class })
+    @NotBlank(message = "Email is required", groups = {UserValidation.OwnerProfileCompleteGroup.class})
     private String email;
 
-    @NotNull(message = "Address is required", groups = { OwnerProfileCompleteGroup.class })
+    @NotNull(message = "Address is required", groups = {UserValidation.OwnerProfileCompleteGroup.class})
     @Valid
     private Address address; // Embedded document
 
-    @NotNull(message = "Email is required", groups = { OwnerProfileCompleteGroup.class })
+    @NotNull(message = "Email is required", groups = {UserValidation.OwnerProfileCompleteGroup.class})
     private LocalDate dateOfBirth; // Using LocalDate for DOB
 
-    @NotBlank(message = "Emergency Contact is required", groups = { OwnerProfileCompleteGroup.class })
+    @NotBlank(message = "Emergency Contact is required", groups = {UserValidation.OwnerProfileCompleteGroup.class})
     private String emergencyContact;
 
-    @NotEmpty(message = "At least one bank account is required", groups = OwnerProfileCompleteGroup.class)
+    @NotEmpty(message = "At least one bank account is required", groups = {UserValidation.OwnerProfileCompleteGroup.class})
     @Valid
     private List<BankAccount> bankAccounts;
 
+    @NotEmpty(message = "Profile picture is required", groups = {UserValidation.OwnerProfileCompleteGroup.class})
     private String profileImageUrl;
 
     // Getters and Setters
@@ -71,24 +95,42 @@ public class OwnerModel {
         this.password = password;
     }
 
-    public String getCitizenship_number() {
-        return citizenshipNumber;
-    }
-
-    public void setCitizenship_number(String citizenshipNumber) {
-        this.citizenshipNumber = citizenshipNumber;
-    }
-
-    public String getphoneNo() {
-        return phoneNo;
-    }
-
-    public void setphoneNo(String phoneNo) {
-        this.phoneNo = phoneNo;
-    }
-
     public String getFullName() {
         return fullName;
+    }
+
+    public String getCitizenship_number() {
+        return citizenship_number;
+    }
+
+    public void setCitizenship_number(String citizenship_number) {
+        this.citizenship_number = citizenship_number;
+    }
+
+    public String getPhone_no() {
+        return phone_no;
+    }
+
+    public void setPhone_no(String phone_no) {
+        this.phone_no = phone_no;
+    }
+
+    @Override
+    public String toString() {
+        return "OwnerModel{" +
+                "id='" + id + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", citizenship_number='" + citizenship_number + '\'' +
+                ", phone_no='" + phone_no + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", email='" + email + '\'' +
+                ", address=" + address +
+                ", dateOfBirth=" + dateOfBirth +
+                ", emergencyContact='" + emergencyContact + '\'' +
+                ", bankAccounts=" + bankAccounts +
+                ", profileImageUrl='" + profileImageUrl + '\'' +
+                '}';
     }
 
     public void setFullName(String fullName) {
@@ -143,21 +185,5 @@ public class OwnerModel {
         this.profileImageUrl = profileImageUrl;
     }
 
-    @Override
-    public String toString() {
-        return "OwnerModel{" +
-                "id='" + id + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", citizenshipNumber='" + citizenshipNumber + '\'' +
-                ", phoneNo='" + phoneNo + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", email='" + email + '\'' +
-                ", address=" + address +
-                ", dateOfBirth=" + dateOfBirth +
-                ", emergencyContact='" + emergencyContact + '\'' +
-                ", bankAccounts=" + bankAccounts +
-                ", profileImageUrl='" + profileImageUrl + '\'' +
-                '}';
-    }
+
 }
