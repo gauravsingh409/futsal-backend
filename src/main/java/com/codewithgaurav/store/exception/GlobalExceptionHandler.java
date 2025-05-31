@@ -2,10 +2,12 @@ package com.codewithgaurav.store.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.codewithgaurav.store.payload.ApiResponse;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -15,4 +17,14 @@ public class GlobalExceptionHandler {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(ex.getMessage(), 404, false));
    }
 
+   @ExceptionHandler(MissingServletRequestPartException.class)
+   public ResponseEntity<?> handleMissingServletRequestPart(MissingServletRequestPartException ex){
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(ex.getMessage(), 400, false));
+   }
+
+   @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+   public ResponseEntity<?> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
+      return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+              .body(new ApiResponse<>(ex.getMessage(), 400, false));
+   }
 }

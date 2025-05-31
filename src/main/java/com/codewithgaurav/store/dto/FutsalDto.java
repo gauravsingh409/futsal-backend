@@ -1,44 +1,43 @@
 package com.codewithgaurav.store.dto;
 
-import com.codewithgaurav.store.validation.FutsalLoginGroup;
-import com.codewithgaurav.store.validation.FutsalRegisterGroup;
+import com.codewithgaurav.store.validation.UserValidation;
 
 import jakarta.validation.constraints.*;
 
 public class FutsalDto {
 
     // username
-    @NotBlank(message = "Username field is missing", groups = { FutsalLoginGroup.class, FutsalRegisterGroup.class })
+    @NotBlank(message = "Username field is missing", groups = { UserValidation.FutsalLoginGroup.class, UserValidation.FutsalRegisterGroup.class })
     @Size(min = 5, max = 20, message = "Username must be between 5 and 20 characters", groups = {
-            FutsalLoginGroup.class,
-            FutsalRegisterGroup.class })
+            UserValidation.FutsalLoginGroup.class,
+            UserValidation.FutsalRegisterGroup.class })
     @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers, and underscores", groups = {
-            FutsalLoginGroup.class, FutsalRegisterGroup.class })
+            UserValidation.FutsalLoginGroup.class, UserValidation.FutsalRegisterGroup.class })
     private String username;
 
     // password
     @NotBlank(message = "Password field is missing", groups = {
-            FutsalLoginGroup.class,
-            FutsalRegisterGroup.class })
+            UserValidation.FutsalLoginGroup.class,
+            UserValidation.FutsalRegisterGroup.class })
     @Size(min = 6, message = "Password must be at least 6 characters long", groups = {
-            FutsalLoginGroup.class,
-            FutsalRegisterGroup.class })
+            UserValidation.FutsalLoginGroup.class,
+            UserValidation.FutsalRegisterGroup.class })
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$", message = "Password must contain uppercase, lowercase, number, and special character", groups = {
-            FutsalLoginGroup.class, FutsalRegisterGroup.class })
+            UserValidation.FutsalLoginGroup.class, UserValidation.FutsalRegisterGroup.class })
     private String password;
 
     // citizenship number
     @NotBlank(message = "Citizenship number is required", groups = {
-            FutsalRegisterGroup.class })
+            UserValidation.FutsalRegisterGroup.class })
     @Pattern(regexp = "^[A-Za-z0-9\\-]+$", message = "Citizenship number can only contain letters, numbers, and hyphens", groups = {
-            FutsalRegisterGroup.class })
+            UserValidation.FutsalRegisterGroup.class })
     private String citizenshipNumber;
 
     // phone number
     @NotBlank(message = "Phone number is required", groups = {
-            FutsalRegisterGroup.class })
+            UserValidation.FutsalRegisterGroup.class })
     @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits", groups = {
-            FutsalRegisterGroup.class })
+            UserValidation.FutsalRegisterGroup.class })
     private String phone_no;
 
     // Getters and Setters

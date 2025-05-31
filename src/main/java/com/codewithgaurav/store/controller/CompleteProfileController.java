@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 
+import com.codewithgaurav.store.model.UserModel;
+import com.codewithgaurav.store.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.services.JwtService;
-import com.codewithgaurav.store.services.OwnerCompleteProfileService;
-import com.codewithgaurav.store.validation.OwnerProfileCompleteGroup;
+import com.codewithgaurav.store.services.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,7 +37,7 @@ public class CompleteProfileController {
 
 
     @Autowired
-    OwnerCompleteProfileService service;
+    UserService service;
 
     @Autowired
     JwtService jwtService;
@@ -46,7 +47,7 @@ public class CompleteProfileController {
 
     @SuppressWarnings("unused")
     @PutMapping(value = "/owner", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> ownerCompleteProfile(@RequestPart("data") @Validated(OwnerProfileCompleteGroup.class) OwnerModel request, @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> ownerCompleteProfile(@RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) OwnerModel request, @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
 
         try {
             String authHeader = httpRequest.getHeader("Authorization");
@@ -106,6 +107,50 @@ public class CompleteProfileController {
         } catch (io.jsonwebtoken.JwtException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Invalid token", 401, false));
         }
+    }
+
+    @PutMapping(value = "/user", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> userCompleteProfile(@RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) UserModel request, @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
+        String authHeader = httpRequest.getHeader("Authorization");
+        // check if token is present
+        if (authHeader == null || !authHeader.startsWith("Bearer")) {
+            ApiResponse<Map<String, Object>> response = new ApiResponse<>("Token not found", 401, false);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        String token = authHeader.substring(7);
+        String id = jwtService.extractId(token);
+        String originalFilename = photos.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String fileName = UUID.randomUUID() + fileExtension;
+        Path uploadPath = Paths.get(System.getProperty("user.dir"), "uploads", "users");
+
+        try {
+            Files.createDirectories(uploadPath);
+        } catch (IOException e) {
+            ApiResponse<Map<String, Object>> response = new ApiResponse<>(e.getMessage(), 401, false);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        File destination = new File(uploadPath.toFile(), fileName);
+        try {
+            photos.transferTo(destination);
+        } catch (IOException e) {
+            ApiResponse<Map<String, Object>> response = new ApiResponse<>(e.getMessage(), 400, false);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        request.setProfile_picture("/uploads/users/" + fileName);
+
+        UserModel updateUser = service.updateUserProfile(id,request);
+        System.out.println(updateUser);
+
+//        String userJson = objectMapper.writeValueAsString(updateUser);
+
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("Good", 201, false));
     }
 
 }

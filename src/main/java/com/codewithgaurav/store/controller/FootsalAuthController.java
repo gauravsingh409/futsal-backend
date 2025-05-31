@@ -3,6 +3,7 @@ package com.codewithgaurav.store.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.codewithgaurav.store.validation.UserValidation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,8 +18,6 @@ import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.repository.FootsalRepository;
 import com.codewithgaurav.store.services.JwtService;
-import com.codewithgaurav.store.validation.FutsalLoginGroup;
-import com.codewithgaurav.store.validation.FutsalRegisterGroup;
 
 @RestController
 @RequestMapping("/api/auth/futsal")
@@ -36,8 +35,8 @@ public class FootsalAuthController {
       this.jwtService = jwtService;
    }
 
-   @PostMapping("/register") // become /api/auth/footsal/register
-   public ResponseEntity<?> registerFootsal(@Validated(FutsalRegisterGroup.class) @RequestBody FutsalDto request) {
+   @PostMapping("/register") // become /api/auth/futsal/register
+   public ResponseEntity<?> registerFutsal(@Validated(UserValidation.FutsalRegisterGroup.class) @RequestBody FutsalDto request) {
       // Check if the username exists
       if (footsalRepository.findByUsername(request.getUsername()) != null) {
          ApiResponse<Map<String, Object>> response = new ApiResponse<>("Username already exists",
@@ -64,7 +63,7 @@ public class FootsalAuthController {
    }
 
    @PostMapping("/login")
-   public ResponseEntity<?> loginFootsal(@Validated(FutsalLoginGroup.class) @RequestBody FutsalDto request) {
+   public ResponseEntity<?> loginFootsal(@Validated(UserValidation.FutsalLoginGroup.class) @RequestBody FutsalDto request) {
 
       // Find the user in the database
       OwnerModel footsal = footsalRepository.findByUsername(request.getUsername());

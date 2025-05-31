@@ -3,11 +3,9 @@ package com.codewithgaurav.store.model;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.codewithgaurav.store.validation.UserValidation;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import com.codewithgaurav.store.validation.OwnerProfileCompleteGroup;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -24,26 +22,27 @@ public class OwnerModel {
     private String phoneNo;
 
     // Additional Details
-    @NotBlank(message = "Fullname is required", groups = { OwnerProfileCompleteGroup.class })
+    @NotBlank(message = "Fullname is required", groups = { UserValidation.OwnerProfileCompleteGroup.class })
     private String fullName;
 
-    @NotBlank(message = "Email is required", groups = { OwnerProfileCompleteGroup.class })
+    @NotBlank(message = "Email is required", groups = { UserValidation.OwnerProfileCompleteGroup.class })
     private String email;
 
-    @NotNull(message = "Address is required", groups = { OwnerProfileCompleteGroup.class })
+    @NotNull(message = "Address is required", groups = { UserValidation.OwnerProfileCompleteGroup.class })
     @Valid
     private Address address; // Embedded document
 
-    @NotNull(message = "Email is required", groups = { OwnerProfileCompleteGroup.class })
+    @NotNull(message = "Email is required", groups = { UserValidation.OwnerProfileCompleteGroup.class })
     private LocalDate dateOfBirth; // Using LocalDate for DOB
 
-    @NotBlank(message = "Emergency Contact is required", groups = { OwnerProfileCompleteGroup.class })
+    @NotBlank(message = "Emergency Contact is required", groups = { UserValidation.OwnerProfileCompleteGroup.class })
     private String emergencyContact;
 
-    @NotEmpty(message = "At least one bank account is required", groups = OwnerProfileCompleteGroup.class)
+    @NotEmpty(message = "At least one bank account is required", groups = {UserValidation.OwnerProfileCompleteGroup.class})
     @Valid
     private List<BankAccount> bankAccounts;
 
+    @NotEmpty(message = "Profile picture is required", groups = {UserValidation.OwnerProfileCompleteGroup.class})
     private String profileImageUrl;
 
     // Getters and Setters

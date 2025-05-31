@@ -3,6 +3,7 @@ package com.codewithgaurav.store.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.codewithgaurav.store.validation.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,11 +11,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.codewithgaurav.store.dto.UserAuthDTO;
 import com.codewithgaurav.store.model.UserModel;
 import com.codewithgaurav.store.repository.UserRepository;
 import com.codewithgaurav.store.services.JwtService;
-import com.codewithgaurav.store.validation.UserLoginGroup;
 
 @RestController
 @RequestMapping("/api/auth") // Base path for all methods in this controller
@@ -34,7 +33,7 @@ public class UserAuthController {
     }
 
     @PostMapping("/register") // Becomes /api/auth/register
-    public ResponseEntity<?> registerUser(@Validated(UserLoginGroup.class) @RequestBody UserAuthDTO request) {
+    public ResponseEntity<?> registerUser(@Validated(UserValidation.UserLoginGroup.class) @RequestBody UserModel request) {
         Map<String, Object> response = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
 
@@ -70,7 +69,7 @@ public class UserAuthController {
     }
 
     @PostMapping("/login") // Becomes /api/auth/register
-    public ResponseEntity<?> authenticateUser(@Validated(UserLoginGroup.class) @RequestBody UserAuthDTO userAuthDTO) {
+    public ResponseEntity<?> authenticateUser(@Validated(UserValidation.UserLoginGroup.class) @RequestBody UserModel userAuthDTO) {
         Map<String, Object> response = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
         Map<String, Object> error = new HashMap<>();
