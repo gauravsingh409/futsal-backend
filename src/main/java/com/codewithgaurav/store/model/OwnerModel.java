@@ -14,36 +14,24 @@ public class OwnerModel {
     @Id
     private String id;
 
-    @NotBlank(message = "Username field is missing", groups = {UserValidation.FutsalLoginGroup.class, UserValidation.FutsalRegisterGroup.class})
-    @Size(min = 5, max = 20, message = "Username must be between 5 and 20 characters", groups = {
-            UserValidation.FutsalLoginGroup.class,
-            UserValidation.FutsalRegisterGroup.class})
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers, and underscores", groups = {
-            UserValidation.FutsalLoginGroup.class, UserValidation.FutsalRegisterGroup.class})
+    @NotBlank(message = "Username field is missing", groups = {UserValidation.OwnerLoginGroup.class, UserValidation.OwnerRegisterGroup.class})
+    @Size(min = 5, max = 20, message = "Username must be between 5 and 20 characters", groups = {UserValidation.OwnerLoginGroup.class, UserValidation.OwnerRegisterGroup.class})
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers, and underscores", groups = {UserValidation.OwnerLoginGroup.class, UserValidation.OwnerRegisterGroup.class})
     private String username;
 
 
-    @NotBlank(message = "Password field is missing", groups = {
-            UserValidation.FutsalLoginGroup.class,
-            UserValidation.FutsalRegisterGroup.class})
-    @Size(min = 6, message = "Password must be at least 6 characters long", groups = {
-            UserValidation.FutsalLoginGroup.class,
-            UserValidation.FutsalRegisterGroup.class})
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$", message = "Password must contain uppercase, lowercase, number, and special character", groups = {
-            UserValidation.FutsalLoginGroup.class, UserValidation.FutsalRegisterGroup.class})
+    @NotBlank(message = "Password field is missing", groups = {UserValidation.OwnerLoginGroup.class, UserValidation.OwnerRegisterGroup.class})
+    @Size(min = 6, message = "Password must be at least 6 characters long", groups = {UserValidation.OwnerLoginGroup.class, UserValidation.OwnerRegisterGroup.class})
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$", message = "Password must contain uppercase, lowercase, number, and special character", groups = {UserValidation.OwnerLoginGroup.class, UserValidation.OwnerRegisterGroup.class})
     private String password;
 
-    @NotBlank(message = "Citizenship number is required", groups = {
-            UserValidation.FutsalRegisterGroup.class})
-    @Pattern(regexp = "^[A-Za-z0-9\\-]+$", message = "Citizenship number can only contain letters, numbers, and hyphens", groups = {
-            UserValidation.FutsalRegisterGroup.class})
+    @NotBlank(message = "Citizenship number is required", groups = {UserValidation.OwnerRegisterGroup.class})
+    @Pattern(regexp = "^[A-Za-z0-9\\-]+$", message = "Citizenship number can only contain letters, numbers, and hyphens", groups = {UserValidation.OwnerRegisterGroup.class})
     private String citizenship_number;
 
 
-    @NotBlank(message = "Phone number is required", groups = {
-            UserValidation.FutsalRegisterGroup.class})
-    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits", groups = {
-            UserValidation.FutsalRegisterGroup.class})
+    @NotBlank(message = "Phone number is required", groups = {UserValidation.OwnerRegisterGroup.class})
+    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be 10 digits", groups = {UserValidation.OwnerRegisterGroup.class})
     private String phone_no;
 
     // Additional Details
@@ -69,6 +57,9 @@ public class OwnerModel {
 
     @NotEmpty(message = "Profile picture is required", groups = {UserValidation.OwnerProfileCompleteGroup.class})
     private String profileImageUrl;
+
+    private boolean is_user = false;
+    private boolean is_owner = true;
 
     // Getters and Setters
     public String getId() {
@@ -113,24 +104,6 @@ public class OwnerModel {
 
     public void setPhone_no(String phone_no) {
         this.phone_no = phone_no;
-    }
-
-    @Override
-    public String toString() {
-        return "OwnerModel{" +
-                "id='" + id + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", citizenship_number='" + citizenship_number + '\'' +
-                ", phone_no='" + phone_no + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", email='" + email + '\'' +
-                ", address=" + address +
-                ", dateOfBirth=" + dateOfBirth +
-                ", emergencyContact='" + emergencyContact + '\'' +
-                ", bankAccounts=" + bankAccounts +
-                ", profileImageUrl='" + profileImageUrl + '\'' +
-                '}';
     }
 
     public void setFullName(String fullName) {
@@ -185,5 +158,24 @@ public class OwnerModel {
         this.profileImageUrl = profileImageUrl;
     }
 
+    public boolean isIs_user() {
+        return is_user;
+    }
 
+    public void setIs_user(boolean is_user) {
+        this.is_user = is_user;
+    }
+
+    public boolean isIs_owner() {
+        return is_owner;
+    }
+
+    public void setIs_owner(boolean is_owner) {
+        this.is_owner = is_owner;
+    }
+
+    @Override
+    public String toString() {
+        return "OwnerModel{" + "id='" + id + '\'' + ", username='" + username + '\'' + ", password='" + password + '\'' + ", citizenship_number='" + citizenship_number + '\'' + ", phone_no='" + phone_no + '\'' + ", fullName='" + fullName + '\'' + ", email='" + email + '\'' + ", address=" + address + ", dateOfBirth=" + dateOfBirth + ", emergencyContact='" + emergencyContact + '\'' + ", bankAccounts=" + bankAccounts + ", profileImageUrl='" + profileImageUrl + '\'' + ", is_user=" + is_user + ", is_owner=" + is_owner + '}';
+    }
 }
