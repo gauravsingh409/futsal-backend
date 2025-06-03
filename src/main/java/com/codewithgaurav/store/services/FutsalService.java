@@ -1,8 +1,10 @@
 package com.codewithgaurav.store.services;
 
+import com.codewithgaurav.store.exception.ResourceNotFoundException;
 import com.codewithgaurav.store.model.FutsalModel;
 import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.repository.OwnerRepository;
+import com.codewithgaurav.store.repository.futsal.FutsalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +25,9 @@ public class FutsalService {
 
     @Autowired
     OwnerRepository repo;
+
+    @Autowired
+    FutsalRepository futsalRepo;
 
     public boolean isOwner(String id) {
         // isPresent return true if the user found else false
@@ -78,5 +83,13 @@ public class FutsalService {
         } catch (IOException ex) {
             throw new RuntimeException("Failed to store the images");
         }
+    }
+
+
+    public boolean registerFutsalDetailsWithOwnerId(FutsalModel request, String id){
+        OwnerModel owner = repo.findById(id).orElseThrow(()-> new ResourceNotFoundException("user not found"));
+        request.setOwner(owner);
+        FutsalModel saved = futsalRepo.save(request);
+        return saved!=null && saved.getId() != null;
     }
 }

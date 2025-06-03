@@ -3,11 +3,13 @@ package com.codewithgaurav.store.model;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
 import java.util.List;
+
 @Document(collection = "futsals")
 public class FutsalModel {
 
@@ -42,7 +44,8 @@ public class FutsalModel {
     private String futsal_cover_images;
 
     @Field("owner")
-    private String owner_id;
+    @DBRef
+    private OwnerModel owner;
 
     @CreatedDate
     private Date created_at;
@@ -58,28 +61,12 @@ public class FutsalModel {
         this.futsal_address = futsal_address;
     }
 
-    public String getOwner_id() {
-        return owner_id;
-    }
-
-    public void setOwner_id(String owner_id) {
-        this.owner_id = owner_id;
-    }
-
     public String getFutsal_cover_images() {
         return futsal_cover_images;
     }
 
     public void setFutsal_cover_images(String futsal_cover_images) {
         this.futsal_cover_images = futsal_cover_images;
-    }
-
-    public List getFutssal_images() {
-        return futsal_images;
-    }
-
-    public void setFutssal_images(List futssal_images) {
-        this.futsal_images = futssal_images;
     }
 
     public String getFutsal_city() {
@@ -146,6 +133,29 @@ public class FutsalModel {
         this.futsal_images = futsal_images;
     }
 
+    public Date getUpdated_at() {
+        return updated_at;
+    }
+
+    public void setUpdated_at(Date updated_at) {
+        this.updated_at = updated_at;
+    }
+
+    public Date getCreated_at() {
+        return created_at;
+    }
+
+    public void setCreated_at(Date created_at) {
+        this.created_at = created_at;
+    }
+
+    public OwnerModel getOwner() {
+        return owner;
+    }
+
+    public void setOwner(OwnerModel owner) {
+        this.owner = owner;
+    }
 
     @Override
     public String toString() {
@@ -160,7 +170,7 @@ public class FutsalModel {
                 ", futsal_city='" + futsal_city + '\'' +
                 ", futsal_images=" + futsal_images +
                 ", futsal_cover_images='" + futsal_cover_images + '\'' +
-                ", owner_id='" + owner_id + '\'' +
+                ", owner=" + owner +
                 ", created_at=" + created_at +
                 ", updated_at=" + updated_at +
                 '}';

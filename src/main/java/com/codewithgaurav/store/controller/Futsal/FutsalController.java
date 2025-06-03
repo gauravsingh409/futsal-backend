@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/futsal")
@@ -36,10 +35,7 @@ public class FutsalController {
 
 
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> registerFutsal(@RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalModel request,
-                                            @RequestPart("images") MultipartFile[] images,
-                                            @RequestPart("cover_image") MultipartFile cover_image, HttpServletRequest httpRequest)
-    {
+    public ResponseEntity<?> registerFutsal(@RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalModel request, @RequestPart("images") MultipartFile[] images, @RequestPart("cover_image") MultipartFile cover_image, HttpServletRequest httpRequest) {
         String authHeader = httpRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer")) {
             ApiResponse<Map<String, Object>> response = new ApiResponse<>("user not authenticated", 401, false);
@@ -53,9 +49,11 @@ public class FutsalController {
             boolean isCoverImageStored = service.storeCoverImage(cover_image, request);
             if (!isCoverImageStored) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("some Error occured while saving the file", 400, false));
             boolean isImagesStored = service.storeMultipleImages(images, request);
-            System.out.println("multiple image are store" + request.getFutsal_images());
+            if (!isImagesStored) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("some Error occured while saving the file", 400, false));
 
-            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("Futsal Registered successfully", 200, false));
+            boolean isDataStore = service.registerFutsalDetailsWithOwnerId(request, id);
+            if (!isDataStore) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("some Error occured while saving the file", 400, false));
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("Futsal Registered successfully", 200, true, request));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("user not authorized", 401, false));
         }
