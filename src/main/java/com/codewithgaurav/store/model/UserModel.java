@@ -30,18 +30,23 @@ public class UserModel {
    @NotBlank(message = "Address is required",groups = {UserValidation.UserCompleteProfileGroup.class})
    private String address;
 
-   @Override
-   public String toString() {
-      return "UserModel{" +
-              "isVerified=" + isVerified +
-              ", phone_no='" + phone_no + '\'' +
-              ", address='" + address + '\'' +
-              ", profile_picture='" + profile_picture + '\'' +
-              ", email='" + email + '\'' +
-              ", password='" + password + '\'' +
-              ", username='" + username + '\'' +
-              ", id='" + id + '\'' +
-              '}';
+   private boolean is_user = true;
+   private boolean is_owner = false;
+
+   public boolean isIs_user() {
+      return is_user;
+   }
+
+   public void setIs_user(boolean is_user) {
+      this.is_user = is_user;
+   }
+
+   public boolean isIs_owner() {
+      return is_owner;
+   }
+
+   public void setIs_owner(boolean is_owner) {
+      this.is_owner = is_owner;
    }
 
    @NotBlank(message = "Phone number is required",groups = {UserValidation.UserCompleteProfileGroup.class})
@@ -119,4 +124,19 @@ public class UserModel {
       this.password = password;
    }
 
+   @Override
+   public String toString() {
+      return "UserModel{" +
+              "id='" + id + '\'' +
+              ", username='" + username + '\'' +
+              ", password='" + password + '\'' +
+              ", email='" + email + '\'' +
+              ", profile_picture='" + profile_picture + '\'' +
+              ", address='" + address + '\'' +
+              ", is_user=" + is_user +
+              ", is_owner=" + is_owner +
+              ", phone_no='" + phone_no + '\'' +
+              ", isVerified=" + isVerified +
+              '}';
+   }
 }

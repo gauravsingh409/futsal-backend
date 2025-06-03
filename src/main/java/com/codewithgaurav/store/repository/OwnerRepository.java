@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import com.codewithgaurav.store.model.OwnerModel;
 
 @Repository
-public interface FootsalRepository extends MongoRepository<OwnerModel, String> {
+public interface OwnerRepository extends MongoRepository<OwnerModel, String> {
    OwnerModel findByUsername(String username);
 
 }

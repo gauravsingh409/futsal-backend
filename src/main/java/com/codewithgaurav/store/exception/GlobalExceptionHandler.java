@@ -12,19 +12,25 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-   @ExceptionHandler(ResourceNotFoundException.class)
-   public ResponseEntity<ApiResponse<?>> handleResourceNotFound(ResourceNotFoundException ex) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(ex.getMessage(), 404, false));
-   }
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponse<?>> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(ex.getMessage(), 404, false));
+    }
 
-   @ExceptionHandler(MissingServletRequestPartException.class)
-   public ResponseEntity<?> handleMissingServletRequestPart(MissingServletRequestPartException ex){
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(ex.getMessage(), 400, false));
-   }
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<?> handleMissingServletRequestPart(MissingServletRequestPartException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(ex.getMessage(), 400, false));
+    }
 
-   @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-   public ResponseEntity<?> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
-      return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-              .body(new ApiResponse<>(ex.getMessage(), 400, false));
-   }
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<?> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(new ApiResponse<>(ex.getMessage(), 400, false));
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(ex.getMessage(), 400, false));
+    }
+
 }

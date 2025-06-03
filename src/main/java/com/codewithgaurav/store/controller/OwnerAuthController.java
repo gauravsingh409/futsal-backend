@@ -15,27 +15,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.payload.ApiResponse;
-import com.codewithgaurav.store.repository.FootsalRepository;
+import com.codewithgaurav.store.repository.OwnerRepository;
 import com.codewithgaurav.store.services.JwtService;
 
 @RestController
-@RequestMapping("/api/auth/futsal")
-public class FootsalAuthController {
+@RequestMapping("/api/auth/owner")
+public class OwnerAuthController {
 
-   private final FootsalRepository footsalRepository;
+   private final OwnerRepository footsalRepository;
    private final BCryptPasswordEncoder passwordEncoder;
    private final JwtService jwtService;
 
    // using constructor injection
-   public FootsalAuthController(FootsalRepository footsalRepository, BCryptPasswordEncoder passwordEncoder,
-         JwtService jwtService) {
+   public OwnerAuthController(OwnerRepository footsalRepository, BCryptPasswordEncoder passwordEncoder,
+                              JwtService jwtService) {
       this.footsalRepository = footsalRepository;
       this.passwordEncoder = passwordEncoder;
       this.jwtService = jwtService;
    }
 
    @PostMapping("/register") // become /api/auth/futsal/register
-   public ResponseEntity<?> registerFutsal(@Validated(UserValidation.FutsalRegisterGroup.class) @RequestBody OwnerModel request) {
+   public ResponseEntity<?> registerFutsal(@Validated(UserValidation.OwnerProfileCompleteGroup.class) @RequestBody OwnerModel request) {
       // Check if the username exists
       if (footsalRepository.findByUsername(request.getUsername()) != null) {
          ApiResponse<Map<String, Object>> response = new ApiResponse<>("Username already exists",
@@ -62,7 +62,7 @@ public class FootsalAuthController {
    }
 
    @PostMapping("/login")
-   public ResponseEntity<?> loginFootsal(@Validated(UserValidation.FutsalLoginGroup.class) @RequestBody OwnerModel request) {
+   public ResponseEntity<?> loginFootsal(@Validated(UserValidation.OwnerLoginGroup.class) @RequestBody OwnerModel request) {
 
       // Find the user in the database
       OwnerModel footsal = footsalRepository.findByUsername(request.getUsername());
