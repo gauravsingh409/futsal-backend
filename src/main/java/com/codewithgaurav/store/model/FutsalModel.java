@@ -46,6 +46,9 @@ public class FutsalModel {
     @Field("cover_image")
     private String converImage;
 
+    @Field("registration_photo")
+    private String registrationPhoto;
+
     @Field("owner")
     @DBRef
     private OwnerModel owner;
@@ -160,14 +163,20 @@ public class FutsalModel {
         this.updatedAt = updatedAt;
     }
 
+    public String getRegistrationPhoto() {
+        return registrationPhoto;
+    }
+
+    public void setRegistrationPhoto(String registrationPhoto) {
+        this.registrationPhoto = registrationPhoto;
+    }
+
     @Override
     public String toString() {
         return "FutsalModel [id=" + id + ", name=" + name + ", registrationNumber=" + registrationNumber + ", address="
                 + address + ", location=" + location + ", state=" + state + ", district=" + district + ", city=" + city
-                + ", images=" + images + ", converImage=" + converImage + ", owner=" + owner + ", createdAt="
-                + createdAt + ", updatedAt=" + updatedAt + "]";
+                + ", images=" + images + ", converImage=" + converImage + ", registrationPhoto=" + registrationPhoto
+                + ", owner=" + owner + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
     }
-
-
 
 }

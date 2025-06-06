@@ -31,8 +31,10 @@ public class FutsalController {
 
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> registerFutsal(
+            @RequestPart("registration_photo") MultipartFile registraionPhoto,
             @RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalModel request,
-            @RequestPart("images") MultipartFile[] images, @RequestPart("cover_image") MultipartFile cover_image,
+            @RequestPart(value = "images", required = false) MultipartFile[] images,
+            @RequestPart("cover_image") MultipartFile coverImage,
             HttpServletRequest httpRequest) {
         String authHeader = httpRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer")) {
@@ -51,15 +53,30 @@ public class FutsalController {
 
         // Store the Futsal Details in the database
         if (isOwner) {
-            boolean isCoverImageStored = service.storeCoverImage(cover_image, request);
-            if (!isCoverImageStored)
+            // Store the Registration Photo
+            boolean isRegistrationPhoto = service.storeRegistrationPhoto(registraionPhoto, request);
+            if (!isRegistrationPhoto)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new ApiResponse<>("some Error occured while saving the file", 400, false));
-            boolean isImagesStored = service.storeMultipleImages(images, request);
-            if (!isImagesStored)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new ApiResponse<>("some Error occured while saving the file", 400, false));
+                        .body(new ApiResponse<>("Registration Photo not saved", 400, false));
 
+            // Store Cover Images
+            if (coverImage != null && !coverImage.isEmpty()) {
+                boolean isCoverImageStored = service.storeCoverImage(coverImage, request);
+                if (!isCoverImageStored) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(new ApiResponse<>("Some error occurred while saving the cover image", 400, false));
+                }
+            }
+
+            // Store the Multiple Images
+            if (images != null && images.length != 0) {
+                boolean isImagesStored = service.storeMultipleImages(images, request);
+                if (!isImagesStored)
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(new ApiResponse<>("some Error occured while saving the file", 400, false));
+            }
+
+            // Store the Futsal Data JSON
             boolean isDataStore = service.registerFutsalDetailsWithOwnerId(request, id);
             if (!isDataStore)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)

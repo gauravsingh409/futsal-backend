@@ -28,6 +28,7 @@ public class FutsalService {
     @Autowired
     FutsalRepository futsalRepo;
 
+    // IS Requested user is Owner
     public boolean isOwner(String id) {
         // isPresent return true if the user found else false
         Optional<OwnerModel> owner = repo.findById(id);
@@ -55,7 +56,8 @@ public class FutsalService {
             request.setConverImage(imageUrl);
             return true;
         } catch (IOException e) {
-            throw new RuntimeException("Error while saving the file", e);
+            // throw new RuntimeException("Error while saving the cover image", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -63,7 +65,6 @@ public class FutsalService {
     public boolean storeMultipleImages(MultipartFile[] images, FutsalModel request) {
         List<String> storedImages = new ArrayList<>();
         Path uploadImagesPath = Paths.get(System.getProperty("user.dir"), "uploads", "futsal", "images");
-
         try {
             Files.createDirectories(uploadImagesPath);
             for (MultipartFile image : images) {
@@ -86,7 +87,28 @@ public class FutsalService {
         }
     }
 
-    // Register futsal to database
+    // Store Registration Photo
+    public boolean storeRegistrationPhoto(MultipartFile file, FutsalModel request) {
+        Path uploadPath = Paths.get(System.getProperty("user.dir"), "uploads", "futsal", "registration");
+        String fileExtension = "";
+        try {
+            Files.createDirectories(uploadPath);
+            String originalName = file.getOriginalFilename();
+            if (originalName != null && originalName.contains(".")) {
+                fileExtension = originalName.substring(originalName.lastIndexOf("."));
+            }
+            String fileName = UUID.randomUUID() + originalName + fileExtension;
+            File destination = new File(uploadPath.toFile(), fileName);
+            file.transferTo(destination);
+            String fileUrl = "/uploads/futsal/registration/" + fileName;
+            request.setRegistrationPhoto(fileUrl);
+            return true;
+        } catch (IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
+    // Register futsal data (JSON) to database
     public boolean registerFutsalDetailsWithOwnerId(FutsalModel request, String id) {
         OwnerModel owner = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("user not found"));
         request.setOwner(owner);
