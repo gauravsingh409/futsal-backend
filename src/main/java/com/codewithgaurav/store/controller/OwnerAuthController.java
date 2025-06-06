@@ -28,14 +28,15 @@ public class OwnerAuthController {
 
    // using constructor injection
    public OwnerAuthController(OwnerRepository footsalRepository, BCryptPasswordEncoder passwordEncoder,
-                              JwtService jwtService) {
+         JwtService jwtService) {
       this.footsalRepository = footsalRepository;
       this.passwordEncoder = passwordEncoder;
       this.jwtService = jwtService;
    }
 
    @PostMapping("/register") // become /api/auth/futsal/register
-   public ResponseEntity<?> registerFutsal(@Validated(UserValidation.OwnerProfileCompleteGroup.class) @RequestBody OwnerModel request) {
+   public ResponseEntity<?> registerFutsal(
+         @Validated(UserValidation.OwnerRegisterGroup.class) @RequestBody OwnerModel request) {
       // Check if the username exists
       if (footsalRepository.findByUsername(request.getUsername()) != null) {
          ApiResponse<Map<String, Object>> response = new ApiResponse<>("Username already exists",
@@ -46,7 +47,7 @@ public class OwnerAuthController {
       OwnerModel footsal = new OwnerModel();
       footsal.setUsername(request.getUsername());
       footsal.setPassword(passwordEncoder.encode(request.getPassword()));
-      footsal.setCitizenship_number(request.getCitizenship_number());
+      footsal.setCitizenshipNumber(request.getCitizenshipNumber());
       footsal.setPhone_no(request.getPhone_no());
       OwnerModel savedUser = footsalRepository.save(footsal);
 
@@ -62,7 +63,8 @@ public class OwnerAuthController {
    }
 
    @PostMapping("/login")
-   public ResponseEntity<?> loginFootsal(@Validated(UserValidation.OwnerLoginGroup.class) @RequestBody OwnerModel request) {
+   public ResponseEntity<?> loginFootsal(
+         @Validated(UserValidation.OwnerLoginGroup.class) @RequestBody OwnerModel request) {
 
       // Find the user in the database
       OwnerModel footsal = footsalRepository.findByUsername(request.getUsername());

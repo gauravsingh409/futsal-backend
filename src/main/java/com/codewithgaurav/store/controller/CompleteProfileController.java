@@ -45,7 +45,6 @@ public class CompleteProfileController {
     @Autowired
     ObjectMapper objectMapper;
 
-    @SuppressWarnings("unused")
     @PutMapping(value = "/owner", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> ownerCompleteProfile(@RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) OwnerModel request, @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
 

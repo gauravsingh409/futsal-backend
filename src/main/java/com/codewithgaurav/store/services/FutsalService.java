@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-
 @Service
 public class FutsalService {
 
@@ -29,12 +28,14 @@ public class FutsalService {
     @Autowired
     FutsalRepository futsalRepo;
 
+    // IS Requested user is Owner
     public boolean isOwner(String id) {
         // isPresent return true if the user found else false
         Optional<OwnerModel> owner = repo.findById(id);
         return owner.map(OwnerModel::isIs_owner).orElse(false);
     }
 
+    // Store Cover Image when register
     public boolean storeCoverImage(MultipartFile cover_image, FutsalModel request) {
         String originalFilename = cover_image.getOriginalFilename();
         String fileExtension = "";
@@ -52,17 +53,18 @@ public class FutsalService {
         try {
             cover_image.transferTo(destination);
             String imageUrl = "/uploads/futsal/cover/" + coverImageName;
-            request.setFutsal_cover_images(imageUrl);
+            request.setConverImage(imageUrl);
             return true;
         } catch (IOException e) {
-            throw new RuntimeException("Error while saving the file", e);
+            // throw new RuntimeException("Error while saving the cover image", e);
+            throw new RuntimeException(e);
         }
     }
 
+    // Store Multiple Image of Futsal
     public boolean storeMultipleImages(MultipartFile[] images, FutsalModel request) {
         List<String> storedImages = new ArrayList<>();
         Path uploadImagesPath = Paths.get(System.getProperty("user.dir"), "uploads", "futsal", "images");
-
         try {
             Files.createDirectories(uploadImagesPath);
             for (MultipartFile image : images) {
@@ -78,18 +80,44 @@ public class FutsalService {
                 String imageUrl = "/uploads/futsal/images/" + uniqueFileName;
                 storedImages.add(imageUrl);
             }
-            request.setFutsal_images(storedImages);
+            request.setImages(storedImages);
             return true;
         } catch (IOException ex) {
             throw new RuntimeException("Failed to store the images");
         }
     }
 
+    // Store Registration Photo
+    public boolean storeRegistrationPhoto(MultipartFile file, FutsalModel request) {
+        Path uploadPath = Paths.get(System.getProperty("user.dir"), "uploads", "futsal", "registration");
+        String fileExtension = "";
+        try {
+            Files.createDirectories(uploadPath);
+            String originalName = file.getOriginalFilename();
+            if (originalName != null && originalName.contains(".")) {
+                fileExtension = originalName.substring(originalName.lastIndexOf("."));
+            }
+            String fileName = UUID.randomUUID() + originalName + fileExtension;
+            File destination = new File(uploadPath.toFile(), fileName);
+            file.transferTo(destination);
+            String fileUrl = "/uploads/futsal/registration/" + fileName;
+            request.setRegistrationPhoto(fileUrl);
+            return true;
+        } catch (IOException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
 
-    public boolean registerFutsalDetailsWithOwnerId(FutsalModel request, String id){
-        OwnerModel owner = repo.findById(id).orElseThrow(()-> new ResourceNotFoundException("user not found"));
+    // Register futsal data (JSON) to database
+    public boolean registerFutsalDetailsWithOwnerId(FutsalModel request, String id) {
+        OwnerModel owner = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("user not found"));
         request.setOwner(owner);
         FutsalModel saved = futsalRepo.save(request);
-        return saved!=null && saved.getId() != null;
+        return saved != null && saved.getId() != null;
+    }
+
+    // check the futsal with registration number exists
+    public boolean isFutsalAlreadyRegistered(String registrationNumber) {
+        return futsalRepo.existsByRegistrationNumber(registrationNumber);
     }
 }

@@ -3,6 +3,8 @@ package com.codewithgaurav.store.model;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -17,105 +19,45 @@ public class FutsalModel {
     private String id;
 
     @Field("name")
-    private String futsal_name;
+    private String name;
 
-    @Field("regisgration_number")
-    private String futsal_registration_number;
+    @Field("registration_number")
+    @Indexed(unique = true)
+    private String registrationNumber;
 
     @Field("address")
-    private String futsal_address;
+    private String address;
 
     @Field("location")
-    private String futsal_location;
+    private GeoJsonPoint location;
 
     @Field("state")
-    private String futsal_state;
+    private String state;
 
     @Field("district")
-    private String futsal_district;
+    private String district;
 
     @Field("city")
-    private String futsal_city;
+    private String city;
 
     @Field("images")
-    private List<String> futsal_images;
+    private List<String> images;
 
     @Field("cover_image")
-    private String futsal_cover_images;
+    private String converImage;
+
+    @Field("registration_photo")
+    private String registrationPhoto;
 
     @Field("owner")
     @DBRef
     private OwnerModel owner;
 
     @CreatedDate
-    private Date created_at;
+    private Date createdAt;
 
     @LastModifiedDate
-    private Date updated_at;
-
-    public String getFutsal_address() {
-        return futsal_address;
-    }
-
-    public void setFutsal_address(String futsal_address) {
-        this.futsal_address = futsal_address;
-    }
-
-    public String getFutsal_cover_images() {
-        return futsal_cover_images;
-    }
-
-    public void setFutsal_cover_images(String futsal_cover_images) {
-        this.futsal_cover_images = futsal_cover_images;
-    }
-
-    public String getFutsal_city() {
-        return futsal_city;
-    }
-
-    public void setFutsal_city(String futsal_city) {
-        this.futsal_city = futsal_city;
-    }
-
-    public String getFutsal_district() {
-        return futsal_district;
-    }
-
-    public void setFutsal_district(String futsal_district) {
-        this.futsal_district = futsal_district;
-    }
-
-    public String getFutsal_location() {
-        return futsal_location;
-    }
-
-    public void setFutsal_location(String futsal_location) {
-        this.futsal_location = futsal_location;
-    }
-
-    public String getFutsal_state() {
-        return futsal_state;
-    }
-
-    public void setFutsal_state(String futsal_state) {
-        this.futsal_state = futsal_state;
-    }
-
-    public String getFutsal_registration_number() {
-        return futsal_registration_number;
-    }
-
-    public void setFutsal_registration_number(String futsal_registration_number) {
-        this.futsal_registration_number = futsal_registration_number;
-    }
-
-    public String getFutsal_name() {
-        return futsal_name;
-    }
-
-    public void setFutsal_name(String futsal_name) {
-        this.futsal_name = futsal_name;
-    }
+    private Date updatedAt;
 
     public String getId() {
         return id;
@@ -125,28 +67,76 @@ public class FutsalModel {
         this.id = id;
     }
 
-    public List<String> getFutsal_images() {
-        return futsal_images;
+    public String getName() {
+        return name;
     }
 
-    public void setFutsal_images(List<String> futsal_images) {
-        this.futsal_images = futsal_images;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Date getUpdated_at() {
-        return updated_at;
+    public String getRegistrationNumber() {
+        return registrationNumber;
     }
 
-    public void setUpdated_at(Date updated_at) {
-        this.updated_at = updated_at;
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
     }
 
-    public Date getCreated_at() {
-        return created_at;
+    public String getAddress() {
+        return address;
     }
 
-    public void setCreated_at(Date created_at) {
-        this.created_at = created_at;
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public GeoJsonPoint getLocation() {
+        return location;
+    }
+
+    public void setLocation(GeoJsonPoint location) {
+        this.location = location;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
+
+    public String getConverImage() {
+        return converImage;
+    }
+
+    public void setConverImage(String converImage) {
+        this.converImage = converImage;
     }
 
     public OwnerModel getOwner() {
@@ -157,22 +147,36 @@ public class FutsalModel {
         this.owner = owner;
     }
 
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getRegistrationPhoto() {
+        return registrationPhoto;
+    }
+
+    public void setRegistrationPhoto(String registrationPhoto) {
+        this.registrationPhoto = registrationPhoto;
+    }
+
     @Override
     public String toString() {
-        return "FutsalModel{" +
-                "id='" + id + '\'' +
-                ", futsal_name='" + futsal_name + '\'' +
-                ", futsal_registration_number='" + futsal_registration_number + '\'' +
-                ", futsal_address='" + futsal_address + '\'' +
-                ", futsal_location='" + futsal_location + '\'' +
-                ", futsal_state='" + futsal_state + '\'' +
-                ", futsal_district='" + futsal_district + '\'' +
-                ", futsal_city='" + futsal_city + '\'' +
-                ", futsal_images=" + futsal_images +
-                ", futsal_cover_images='" + futsal_cover_images + '\'' +
-                ", owner=" + owner +
-                ", created_at=" + created_at +
-                ", updated_at=" + updated_at +
-                '}';
+        return "FutsalModel [id=" + id + ", name=" + name + ", registrationNumber=" + registrationNumber + ", address="
+                + address + ", location=" + location + ", state=" + state + ", district=" + district + ", city=" + city
+                + ", images=" + images + ", converImage=" + converImage + ", registrationPhoto=" + registrationPhoto
+                + ", owner=" + owner + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
     }
+
 }
