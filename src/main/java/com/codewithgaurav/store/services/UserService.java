@@ -1,7 +1,6 @@
 package com.codewithgaurav.store.services;
 
 import java.io.File;
-import java.util.List;
 
 import com.codewithgaurav.store.model.UserModel;
 import com.codewithgaurav.store.repository.UserRepository;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.codewithgaurav.store.exception.ResourceNotFoundException;
 import com.codewithgaurav.store.model.Address;
-import com.codewithgaurav.store.model.BankAccount;
 import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.repository.profile.OwnerCompleteProfileRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,9 +38,12 @@ public class UserService {
     public UserModel updateUserProfile(String id, UserModel request) throws RuntimeException {
         UserModel user = userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
-        if (request.getEmail() != null && !request.getEmail().isEmpty()) user.setEmail(request.getEmail());
-        if (request.getAddress() != null && !request.getAddress().isEmpty()) user.setAddress(request.getAddress());
-        if (request.getPhone_no() != null && !request.getPhone_no().isEmpty()) user.setPhone_no(request.getPhone_no());
+        if (request.getEmail() != null && !request.getEmail().isEmpty())
+            user.setEmail(request.getEmail());
+        if (request.getAddress() != null && !request.getAddress().isEmpty())
+            user.setAddress(request.getAddress());
+        if (request.getPhone_no() != null && !request.getPhone_no().isEmpty())
+            user.setPhone_no(request.getPhone_no());
 
         if (user.getProfile_picture() != null && !user.getProfile_picture().isEmpty()) {
             String oldFilePath = System.getProperty("user.dir") + user.getProfile_picture();
@@ -66,22 +67,27 @@ public class UserService {
     }
 
     public OwnerModel updateOwnerDetails(String id, OwnerModel request) {
-        OwnerModel existingOwner = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Owner", "id", id));
+        OwnerModel existingOwner = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Owner", "id", id));
 
         // update field
         // FullName
-        if (request.getFullName() != null && !request.getFullName().isEmpty()) existingOwner.setFullName(request.getFullName());
+        if (request.getFullName() != null && !request.getFullName().isEmpty())
+            existingOwner.setFullName(request.getFullName());
 
         // Email
-        if (request.getEmail() != null && !request.getEmail().isEmpty()) existingOwner.setEmail(request.getEmail());
+        if (request.getEmail() != null && !request.getEmail().isEmpty())
+            existingOwner.setEmail(request.getEmail());
 
-        //  Date Of Birth
-        if (request.getDateOfBirth() != null) existingOwner.setDateOfBirth(request.getDateOfBirth());
+        // Date Of Birth
+        if (request.getDateOfBirth() != null)
+            existingOwner.setDateOfBirth(request.getDateOfBirth());
 
         // Emergency Number
-        if (request.getEmergencyContact() != null && !request.getEmergencyContact().isEmpty()) existingOwner.setEmergencyContact(request.getEmergencyContact());
+        if (request.getEmergencyContact() != null && !request.getEmergencyContact().isEmpty())
+            existingOwner.setEmergencyContact(request.getEmergencyContact());
 
-        //  Profile Picture
+        // Profile Picture
         if (request.getProfileImageUrl() != null && !request.getProfileImageUrl().isEmpty()) {
             String oldImagePath = System.getProperty("user.dir") + existingOwner.getProfileImageUrl();
             File oldFile = new File(oldImagePath);
@@ -122,44 +128,8 @@ public class UserService {
                 existingAddress.setPostalCode(requestAddress.getPostalCode());
             }
         }
-
-        // for bank account
-        if (request.getBankAccounts() != null && !request.getBankAccounts().isEmpty()) {
-            List<BankAccount> existingAccounts = existingOwner.getBankAccounts();
-            if (existingAccounts == null) {
-                existingOwner.setBankAccounts(request.getBankAccounts());
-            } else {
-                for (BankAccount newAccount : request.getBankAccounts()) {
-                    boolean found = false;
-                    for (BankAccount existingAccount : existingAccounts) {
-                        if (existingAccount.getAccountNumber().equals(newAccount.getAccountNumber())) {
-                            // Update fields selectively
-                            if (newAccount.getAccountHolderName() != null && !newAccount.getAccountHolderName().isEmpty()) {
-                                existingAccount.setAccountHolderName(newAccount.getAccountHolderName());
-                            }
-                            if (newAccount.getBankName() != null && !newAccount.getBankName().isEmpty()) {
-                                existingAccount.setBankName(newAccount.getBankName());
-                            }
-                            if (newAccount.getBranch() != null && !newAccount.getBranch().isEmpty()) {
-                                existingAccount.setBranch(newAccount.getBranch());
-                            }
-                            if (newAccount.getAccountType() != null) {
-                                existingAccount.setAccountType(newAccount.getAccountType());
-                            }
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        // If new account not found in existing list, add it
-                        existingAccounts.add(newAccount);
-                    }
-                }
-            }
-        }
         // save
         return repo.save(existingOwner);
     }
-
 
 }

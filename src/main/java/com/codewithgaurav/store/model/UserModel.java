@@ -1,7 +1,6 @@
 package com.codewithgaurav.store.model;
 
 import com.codewithgaurav.store.validation.UserValidation;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,21 +12,22 @@ public class UserModel {
    @Id
    private String id;
 
-   @NotBlank(message = "Username is required", groups = {UserValidation.UserRegisterGroup.class, UserValidation.UserLoginGroup.class})
+   @NotBlank(message = "Username is required", groups = { UserValidation.UserRegisterGroup.class,
+         UserValidation.UserLoginGroup.class })
    private String username;
 
-   @JsonIgnore
-   @NotBlank(message = "Password is required", groups = {UserValidation.UserLoginGroup.class, UserValidation.UserRegisterGroup.class})
+   @NotBlank(message = "Password is required", groups = { UserValidation.UserLoginGroup.class,
+         UserValidation.UserRegisterGroup.class })
    @Size(min = 6, message = "Password must be at least 6 characters")
    private String password;
 
-   @NotBlank(message = "Email is required", groups = {UserValidation.UserCompleteProfileGroup.class})
-   @Email(message = "Invalid email format", groups = {UserValidation.UserCompleteProfileGroup.class})
+   @NotBlank(message = "Email is required", groups = { UserValidation.UserCompleteProfileGroup.class })
+   @Email(message = "Invalid email format", groups = { UserValidation.UserCompleteProfileGroup.class })
    private String email;
 
    private String profile_picture; // optional, no validation
 
-   @NotBlank(message = "Address is required",groups = {UserValidation.UserCompleteProfileGroup.class})
+   @NotBlank(message = "Address is required", groups = { UserValidation.UserCompleteProfileGroup.class })
    private String address;
 
    private boolean is_user = true;
@@ -49,7 +49,7 @@ public class UserModel {
       this.is_owner = is_owner;
    }
 
-   @NotBlank(message = "Phone number is required",groups = {UserValidation.UserCompleteProfileGroup.class})
+   @NotBlank(message = "Phone number is required", groups = { UserValidation.UserCompleteProfileGroup.class })
    @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Invalid phone number format")
    private String phone_no;
 
@@ -92,8 +92,8 @@ public class UserModel {
    public void setVerified(boolean verified) {
       isVerified = verified;
    }
-   private boolean isVerified;
 
+   private boolean isVerified;
 
    // constructor
    public UserModel() {
@@ -127,16 +127,16 @@ public class UserModel {
    @Override
    public String toString() {
       return "UserModel{" +
-              "id='" + id + '\'' +
-              ", username='" + username + '\'' +
-              ", password='" + password + '\'' +
-              ", email='" + email + '\'' +
-              ", profile_picture='" + profile_picture + '\'' +
-              ", address='" + address + '\'' +
-              ", is_user=" + is_user +
-              ", is_owner=" + is_owner +
-              ", phone_no='" + phone_no + '\'' +
-              ", isVerified=" + isVerified +
-              '}';
+            "id='" + id + '\'' +
+            ", username='" + username + '\'' +
+            ", password='" + password + '\'' +
+            ", email='" + email + '\'' +
+            ", profile_picture='" + profile_picture + '\'' +
+            ", address='" + address + '\'' +
+            ", is_user=" + is_user +
+            ", is_owner=" + is_owner +
+            ", phone_no='" + phone_no + '\'' +
+            ", isVerified=" + isVerified +
+            '}';
    }
 }
