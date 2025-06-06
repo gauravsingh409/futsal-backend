@@ -2,7 +2,6 @@ package com.codewithgaurav.store.controller.Futsal;
 
 import com.codewithgaurav.store.model.FutsalModel;
 import com.codewithgaurav.store.payload.ApiResponse;
-import com.codewithgaurav.store.repository.futsal.FutsalRepository;
 import com.codewithgaurav.store.services.FutsalService;
 import com.codewithgaurav.store.services.JwtService;
 import com.codewithgaurav.store.validation.FutsalValidation;
@@ -30,12 +29,11 @@ public class FutsalController {
     @Autowired
     JwtService jwtService;
 
-    @Autowired
-    FutsalRepository repo;
-
-
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> registerFutsal(@RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalModel request, @RequestPart("images") MultipartFile[] images, @RequestPart("cover_image") MultipartFile cover_image, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> registerFutsal(
+            @RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalModel request,
+            @RequestPart("images") MultipartFile[] images, @RequestPart("cover_image") MultipartFile cover_image,
+            HttpServletRequest httpRequest) {
         String authHeader = httpRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer")) {
             ApiResponse<Map<String, Object>> response = new ApiResponse<>("user not authenticated", 401, false);
@@ -45,17 +43,32 @@ public class FutsalController {
         String id = jwtService.extractId(token);
         boolean isOwner = service.isOwner(id);
 
+        // Check the futsal with this registration number is registered or not
+        boolean isFutsalAlreadyRegistered = service.isFutsalAlreadyRegistered(request.getRegistrationNumber());
+        if (isFutsalAlreadyRegistered)
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>("Futsal Already Registered", 409, false));
+
+        // Store the Futsal Details in the database
         if (isOwner) {
             boolean isCoverImageStored = service.storeCoverImage(cover_image, request);
-            if (!isCoverImageStored) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("some Error occured while saving the file", 400, false));
+            if (!isCoverImageStored)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ApiResponse<>("some Error occured while saving the file", 400, false));
             boolean isImagesStored = service.storeMultipleImages(images, request);
-            if (!isImagesStored) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("some Error occured while saving the file", 400, false));
+            if (!isImagesStored)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ApiResponse<>("some Error occured while saving the file", 400, false));
 
             boolean isDataStore = service.registerFutsalDetailsWithOwnerId(request, id);
-            if (!isDataStore) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("some Error occured while saving the file", 400, false));
-            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("Futsal Registered successfully", 200, true, request));
+            if (!isDataStore)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ApiResponse<>("some Error occured while saving the file", 400, false));
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ApiResponse<>("Futsal Registered successfully", 200, true, request));
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("user not authorized", 401, false));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse<>("user not authorized", 401, false));
         }
     }
 }

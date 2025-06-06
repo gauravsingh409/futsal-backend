@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.codewithgaurav.store.validation.UserValidation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,8 +22,7 @@ public class UserAuthController {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtservice;
 
-    // Using constructor injection instead of field injection
-    @Autowired
+
     public UserAuthController(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder,
             JwtService jwtService) {
         this.userRepository = userRepository;

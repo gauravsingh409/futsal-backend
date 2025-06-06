@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-
 @Service
 public class FutsalService {
 
@@ -35,6 +34,7 @@ public class FutsalService {
         return owner.map(OwnerModel::isIs_owner).orElse(false);
     }
 
+    // Store Cover Image when register
     public boolean storeCoverImage(MultipartFile cover_image, FutsalModel request) {
         String originalFilename = cover_image.getOriginalFilename();
         String fileExtension = "";
@@ -52,13 +52,14 @@ public class FutsalService {
         try {
             cover_image.transferTo(destination);
             String imageUrl = "/uploads/futsal/cover/" + coverImageName;
-            request.setFutsal_cover_images(imageUrl);
+            request.setConverImage(imageUrl);
             return true;
         } catch (IOException e) {
             throw new RuntimeException("Error while saving the file", e);
         }
     }
 
+    // Store Multiple Image of Futsal
     public boolean storeMultipleImages(MultipartFile[] images, FutsalModel request) {
         List<String> storedImages = new ArrayList<>();
         Path uploadImagesPath = Paths.get(System.getProperty("user.dir"), "uploads", "futsal", "images");
@@ -78,18 +79,23 @@ public class FutsalService {
                 String imageUrl = "/uploads/futsal/images/" + uniqueFileName;
                 storedImages.add(imageUrl);
             }
-            request.setFutsal_images(storedImages);
+            request.setImages(storedImages);
             return true;
         } catch (IOException ex) {
             throw new RuntimeException("Failed to store the images");
         }
     }
 
-
-    public boolean registerFutsalDetailsWithOwnerId(FutsalModel request, String id){
-        OwnerModel owner = repo.findById(id).orElseThrow(()-> new ResourceNotFoundException("user not found"));
+    // Register futsal to database
+    public boolean registerFutsalDetailsWithOwnerId(FutsalModel request, String id) {
+        OwnerModel owner = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("user not found"));
         request.setOwner(owner);
         FutsalModel saved = futsalRepo.save(request);
-        return saved!=null && saved.getId() != null;
+        return saved != null && saved.getId() != null;
+    }
+
+    // check the futsal with registration number exists
+    public boolean isFutsalAlreadyRegistered(String registrationNumber) {
+        return futsalRepo.existsByRegistrationNumber(registrationNumber);
     }
 }
