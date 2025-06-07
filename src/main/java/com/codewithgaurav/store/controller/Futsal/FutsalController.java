@@ -99,11 +99,12 @@ public class FutsalController {
     @GetMapping(value = "/get-all")
     public ResponseEntity<?> getFutsals(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int pageSize) {
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String search) {
 
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("name").ascending());
 
-        Page<FutsalModel> futsalPage = service.getAllFutsals(pageable);
+        Page<FutsalModel> futsalPage = service.searchFutsals(search, pageable);
 
         return ResponseEntity.ok().body(futsalPage);
     }

@@ -122,8 +122,18 @@ public class FutsalService {
     public boolean isFutsalAlreadyRegistered(String registrationNumber) {
         return futsalRepo.existsByRegistrationNumber(registrationNumber);
     }
-    
+
+    // Get All Futsal
     public Page<FutsalModel> getAllFutsals(Pageable pageable) {
         return futsalRepo.findAll(pageable);
+    }
+
+    // Futsal search with Pagination
+    public Page<FutsalModel> searchFutsals(String search, Pageable pageable) {
+
+        if (search == null || search.trim().isEmpty()) {
+            return futsalRepo.findAll(pageable); // fallback to all
+        }
+        return futsalRepo.searchByKeyword(search, pageable);
     }
 }

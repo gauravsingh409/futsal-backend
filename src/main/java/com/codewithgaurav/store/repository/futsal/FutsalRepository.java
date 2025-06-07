@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+import org.springframework.lang.NonNull;
 
 public interface FutsalRepository extends MongoRepository<FutsalModel, String> {
    Optional<FutsalModel> findByRegistrationNumber(String futsalRegistrationNumber);
@@ -14,10 +16,20 @@ public interface FutsalRepository extends MongoRepository<FutsalModel, String> {
    boolean existsByRegistrationNumber(String registrationNumber); // check does this exists in database or not
 
    // Get all the futsals with pagination
-   @org.springframework.lang.NonNull
-   Page<FutsalModel> findAll(@org.springframework.lang.NonNull Pageable pageable);
+   @NonNull
+   Page<FutsalModel> findAll(@NonNull Pageable pageable);
 
-   
-
+   // Search By Keyword
+   @Query("""
+            {
+               "$or":[
+                  {"name":{"$regex":?0, "$options":"i"}},
+                  {"city":{"$regex":?0, "$options":"i"}},
+                  {"onwer":{"$regex":?0, "$options":"i"}},
+               ]
+            }
+         """)
+   @NonNull
+   Page<FutsalModel> searchByKeyword(@NonNull String keyword, @NonNull Pageable pageable);
 
 }
