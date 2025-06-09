@@ -25,7 +25,7 @@ public interface FutsalRepository extends MongoRepository<FutsalModel, String> {
                "$or":[
                   {"name":{"$regex":?0, "$options":"i"}},
                   {"city":{"$regex":?0, "$options":"i"}},
-                  {"onwer":{"$regex":?0, "$options":"i"}},
+                  {"owner":{"$regex":?0, "$options":"i"}},
                ]
             }
          """)

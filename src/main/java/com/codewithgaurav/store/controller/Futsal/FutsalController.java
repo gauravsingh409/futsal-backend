@@ -102,6 +102,17 @@ public class FutsalController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String search) {
+
+        // Validate the page and pageSize
+        if (page < 0 || pageSize <= 0) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>("page or page size is not valid", 400, false));
+        }
+        if (pageSize > 30) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>("page size exceed the limit", 400, false));
+        }
+
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("name").ascending());
         Page<FutsalModel> futsalPage = service.searchFutsals(search, pageable);
 
