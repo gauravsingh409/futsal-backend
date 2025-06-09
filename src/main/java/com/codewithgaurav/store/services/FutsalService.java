@@ -6,6 +6,8 @@ import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.repository.OwnerRepository;
 import com.codewithgaurav.store.repository.futsal.FutsalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -119,5 +121,19 @@ public class FutsalService {
     // check the futsal with registration number exists
     public boolean isFutsalAlreadyRegistered(String registrationNumber) {
         return futsalRepo.existsByRegistrationNumber(registrationNumber);
+    }
+
+    // Get All Futsal
+    public Page<FutsalModel> getAllFutsals(Pageable pageable) {
+        return futsalRepo.findAll(pageable);
+    }
+
+    // Futsal search with Pagination
+    public Page<FutsalModel> searchFutsals(String search, Pageable pageable) {
+
+        if (search == null || search.trim().isEmpty()) {
+            return futsalRepo.findAll(pageable); // fallback to all
+        }
+        return futsalRepo.searchByKeyword(search, pageable);
     }
 }
