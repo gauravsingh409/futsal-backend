@@ -2,6 +2,7 @@ package com.codewithgaurav.store.controller.Futsal;
 
 import com.codewithgaurav.store.model.FutsalModel;
 import com.codewithgaurav.store.payload.ApiResponse;
+import com.codewithgaurav.store.payload.PaginatedResponse;
 import com.codewithgaurav.store.services.FutsalService;
 import com.codewithgaurav.store.services.JwtService;
 import com.codewithgaurav.store.validation.FutsalValidation;
@@ -101,11 +102,18 @@ public class FutsalController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String search) {
-
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("name").ascending());
-
         Page<FutsalModel> futsalPage = service.searchFutsals(search, pageable);
 
-        return ResponseEntity.ok().body(futsalPage);
+        var response = new PaginatedResponse<>( // java will automatically infer the type of response
+                // PaginatedResponse<FutsalModel> paginatedData = new PaginatedResponse<>(
+                futsalPage.getContent(),
+                futsalPage.getNumber(),
+                futsalPage.getSize(),
+                futsalPage.getTotalElements(),
+                futsalPage.getTotalPages());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>("Futsal retrieved successfully", 200, true, response));
     }
 }
