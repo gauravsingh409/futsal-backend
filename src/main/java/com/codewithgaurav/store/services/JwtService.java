@@ -5,6 +5,9 @@ import java.util.Date;
 
 import io.jsonwebtoken.JwtException;
 import org.springframework.stereotype.Service;
+
+import com.codewithgaurav.store.security.AuthResult;
+
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -25,7 +28,8 @@ public class JwtService {
                 // accept
                 .claim("id", id) // if we need to store other field too then we can manually add our claim (data)
                 .setIssuedAt(new Date()) // currently issue time
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 60)) // 1 hour after the token creaed
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 60)) // 1 hour after the token
+                                                                                           // creaed
                 .signWith(getKey(), SignatureAlgorithm.HS256) // algorithm with secreatkey
                 .compact(); // convert the token to compact, URL safe string - ready to send to frontend
     }
@@ -36,10 +40,27 @@ public class JwtService {
 
     public String extractId(String token) {
         try {
-            return Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).getBody().get("id", String.class);
-        } catch (JwtException | IllegalArgumentException  e) {
+            return Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).getBody().get("id",
+                    String.class);
+        } catch (JwtException | IllegalArgumentException e) {
             throw new RuntimeException("Invalid or expired jwt token");
         }
 
     }
+
+    // accept the token and extract the id from token
+    public AuthResult extractUserId(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer")) {
+            return new AuthResult(false, null, "Authorization not provided");
+        }
+
+        String token = authHeader.substring(7);
+        try {
+            String userId = this.extractId(token);
+            return new AuthResult(true, userId, null);
+        } catch (Exception e) {
+            return new AuthResult(false, null, token + " is not a valid authorization token");
+        }
+    }
+
 }
