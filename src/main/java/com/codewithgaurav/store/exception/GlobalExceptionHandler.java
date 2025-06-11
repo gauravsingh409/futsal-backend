@@ -1,5 +1,7 @@
 package com.codewithgaurav.store.exception;
 
+import java.util.NoSuchElementException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -20,7 +22,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<?> handleMissingServletRequestPart(MissingServletRequestPartException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(ex.getMessage(), 400, false));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(ex.getMessage(), 400, false));
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
@@ -37,6 +40,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleDeserializationError(HttpMessageNotReadableException ex) {
         return ResponseEntity.badRequest().body(new ApiResponse<>(ex.getMessage(), 400, false));
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<?> handleNoSuchElementException(NoSuchElementException ex) {
+        return ResponseEntity.badRequest()
+                .body(new ApiResponse<>("No Such Element Exception: " + ex.getMessage(), 400, false));
     }
 
 }

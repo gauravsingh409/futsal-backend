@@ -3,6 +3,7 @@ package com.codewithgaurav.store.services;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,12 @@ public class TimeSlotService {
    // Is Futsal TimeSlot exist
    public boolean isTimeSlotExist(String futsalId, LocalDate date, LocalTime startTime) {
       return timeSlotRepo.existsByFutsalIdAndDateAndStartTime(futsalId, date, startTime);
+   }
+
+   // get details by id
+   public TimeSlotModel getDetailsById(String timeSlotId) {
+      Optional<TimeSlotModel> data = timeSlotRepo.findById(timeSlotId);
+      return data.get();
    }
 
 }

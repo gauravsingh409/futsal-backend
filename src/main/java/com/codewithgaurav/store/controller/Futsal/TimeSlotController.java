@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.codewithgaurav.store.model.TimeSlotModel;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.services.FutsalService;
@@ -69,6 +68,13 @@ public class TimeSlotController {
    public ResponseEntity<?> getAllTimeSlot(@PathVariable String futsalId, HttpServletRequest httpServletRequest) {
       List<TimeSlotModel> slots = timeSlotService.getSlotsByFutsal(futsalId);
       return ResponseEntity.ok().body(new ApiResponse<>("Time slot retrieved successfully", 200, true, slots));
+   }
+
+   // get time-slot details by id
+   @GetMapping(value = "/details/{timeSlotId}")
+   public ResponseEntity<?> getTimeSlotDetails(@PathVariable String timeSlotId, HttpServletRequest httpServletRequest) {
+      TimeSlotModel timeSlot = timeSlotService.getDetailsById(timeSlotId);
+      return ResponseEntity.ok().body(new ApiResponse<>("Timeslot Details retrived", 200, true, timeSlot));
    }
 
 }
