@@ -9,11 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.codewithgaurav.store.model.TimeSlotModel;
 import com.codewithgaurav.store.payload.ApiResponse;
+import com.codewithgaurav.store.security.AuthResult;
 import com.codewithgaurav.store.services.FutsalService;
 import com.codewithgaurav.store.services.JwtService;
 import com.codewithgaurav.store.services.TimeSlotService;
@@ -75,6 +77,23 @@ public class TimeSlotController {
    public ResponseEntity<?> getTimeSlotDetails(@PathVariable String timeSlotId, HttpServletRequest httpServletRequest) {
       TimeSlotModel timeSlot = timeSlotService.getDetailsById(timeSlotId);
       return ResponseEntity.ok().body(new ApiResponse<>("Timeslot Details retrived", 200, true, timeSlot));
+   }
+
+   @PutMapping("/details/{timeSlotId}")
+   public ResponseEntity<?> updateTimeSlot(@PathVariable String timeSlotId,
+         HttpServletRequest httpServletRequest,
+         @RequestBody TimeSlotModel request) {
+      String authHeader = httpServletRequest.getHeader("Authorization");
+      AuthResult result = jwtService.extractUserId(authHeader);
+      if (!result.isValid())
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+               new ApiResponse<>(result.getErrorMessage(), 401, false));
+
+      // Update into database
+
+      TimeSlotModel data = timeSlotService.putUpdate(request, timeSlotId);
+
+      return ResponseEntity.ok().body(new ApiResponse<>("Time slot updated successfully", 200, true, data));
    }
 
 }

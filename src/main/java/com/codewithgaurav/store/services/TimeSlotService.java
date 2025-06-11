@@ -50,4 +50,18 @@ public class TimeSlotService {
       return data.get();
    }
 
+   // Time SLot Put Update
+   public TimeSlotModel putUpdate(TimeSlotModel request, String timeSlotId) {
+      Optional<TimeSlotModel> existingOptional = timeSlotRepo.findById(timeSlotId);
+      if (existingOptional.isEmpty())
+         throw new ResourceNotFoundException("Time Slot with Id " + timeSlotId + "not found");
+      // Update the data
+      existingOptional.get().setDate(request.getDate());
+      existingOptional.get().setStartTime(request.getStartTime());
+      existingOptional.get().setEndTime(request.getEndTime());
+      existingOptional.get().setPrice(request.getPrice());
+      timeSlotRepo.save(existingOptional.get());
+      return existingOptional.get();
+   }
+
 }
