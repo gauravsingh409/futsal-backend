@@ -28,8 +28,8 @@ public class JwtService {
                 // accept
                 .claim("id", id) // if we need to store other field too then we can manually add our claim (data)
                 .setIssuedAt(new Date()) // currently issue time
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 60)) // 1 hour after the token
-                                                                                           // creaed
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 1 hour after the token
+                // creaed
                 .signWith(getKey(), SignatureAlgorithm.HS256) // algorithm with secreatkey
                 .compact(); // convert the token to compact, URL safe string - ready to send to frontend
     }
@@ -61,6 +61,28 @@ public class JwtService {
         } catch (Exception e) {
             return new AuthResult(false, null, token + " is not a valid authorization token");
         }
+    }
+
+    // Generate Access Token: valid for 5 minutes
+    public String generateAccessToken(String username, String id) {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("id", id)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5)) // 5 minutes
+                .signWith(getKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    // Generate Refresh Token: valid for 7 days
+    public String generateRefreshToken(String username, String id) {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("id", id)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7)) // 7 days
+                .signWith(getKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
 }
