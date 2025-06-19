@@ -16,7 +16,7 @@ import com.codewithgaurav.store.repository.UserRepository;
 import com.codewithgaurav.store.services.JwtService;
 
 @RestController
-@RequestMapping("/api/auth") // Base path for all methods in this controller
+@RequestMapping("/api/auth/user") // Base path for all methods in this controller
 public class UserAuthController {
 
     private final UserRepository userRepository;
@@ -62,22 +62,28 @@ public class UserAuthController {
     @PostMapping("/login") // Becomes /api/auth/register
     public ResponseEntity<?> authenticateUser(
             @Validated(UserValidation.UserLoginGroup.class) @RequestBody UserModel userAuthDTO) {
-        Map<String, String> data = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
+        Map<String, String> token = new HashMap<>();
 
         // Find user in database
         UserModel existingUserModel = userRepository.findByUsername(userAuthDTO.getUsername());
         if (existingUserModel == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("User not found", 401, false));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("User not found", 400, false));
         }
 
         // Verify password
         if (!passwordEncoder.matches(userAuthDTO.getPassword(), existingUserModel.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Password Wrong", 401, false));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("Password Wrong", 400, false));
         }
 
         // Generate JWT token
-        String token = jwtservice.generateToken(existingUserModel.getUsername(), existingUserModel.getId());
+        String accessToken = jwtservice.generateAccessToken(existingUserModel.getUsername(), existingUserModel.getId());
+        String refreshToken = jwtservice.generateRefreshToken(existingUserModel.getUsername(),
+                existingUserModel.getId());
+        token.put("access", accessToken);
+        token.put("refresh", refreshToken);
         data.put("token", token);
+        data.put("user", existingUserModel);
         // Return Token
         return ResponseEntity.ok(new ApiResponse<>("Login Successful", 200, true, data));
     }
