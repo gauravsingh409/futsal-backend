@@ -5,6 +5,7 @@ import com.codewithgaurav.store.model.FutsalModel;
 import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.repository.OwnerRepository;
 import com.codewithgaurav.store.repository.futsal.FutsalRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -130,10 +131,16 @@ public class FutsalService {
 
     // Futsal search with Pagination
     public Page<FutsalModel> searchFutsals(String search, Pageable pageable) {
+        Page<FutsalModel> futsalPage;
 
-        if (search == null || search.trim().isEmpty()) {
-            return futsalRepo.findAll(pageable); // fallback to all
-        }
-        return futsalRepo.searchByKeyword(search, pageable);
+        if (search == null || search.trim().isEmpty())
+            futsalPage = futsalRepo.findAll(pageable); // fallback to all
+        else
+            futsalPage = futsalRepo.searchByKeyword(search, pageable);
+
+        return futsalPage.map(futsal -> {
+            futsal.setConverImage("http://localhost:8080" + futsal.getConverImage());
+            return futsal;
+        });
     }
 }
