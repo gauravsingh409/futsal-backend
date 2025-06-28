@@ -22,14 +22,14 @@ import com.codewithgaurav.store.services.JwtService;
 @RequestMapping("/api/auth/owner")
 public class OwnerAuthController {
 
-   private final OwnerRepository footsalRepository;
+   private final OwnerRepository ownerRepository;
    private final BCryptPasswordEncoder passwordEncoder;
    private final JwtService jwtService;
 
    // using constructor injection
-   public OwnerAuthController(OwnerRepository footsalRepository, BCryptPasswordEncoder passwordEncoder,
+   public OwnerAuthController(OwnerRepository ownerRepository, BCryptPasswordEncoder passwordEncoder,
          JwtService jwtService) {
-      this.footsalRepository = footsalRepository;
+      this.ownerRepository = ownerRepository;
       this.passwordEncoder = passwordEncoder;
       this.jwtService = jwtService;
    }
@@ -38,7 +38,7 @@ public class OwnerAuthController {
    public ResponseEntity<?> registerFutsal(
          @Validated(UserValidation.OwnerRegisterGroup.class) @RequestBody OwnerModel request) {
       // Check if the username exists
-      if (footsalRepository.findByUsername(request.getUsername()) != null) {
+      if (ownerRepository.findByUsername(request.getUsername()) != null) {
          ApiResponse<Map<String, Object>> response = new ApiResponse<>("Username already exists",
                409, false);
          return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
@@ -49,7 +49,7 @@ public class OwnerAuthController {
       footsal.setPassword(passwordEncoder.encode(request.getPassword()));
       footsal.setCitizenshipNumber(request.getCitizenshipNumber());
       footsal.setPhone_no(request.getPhone_no());
-      OwnerModel savedUser = footsalRepository.save(footsal);
+      OwnerModel savedUser = ownerRepository.save(footsal);
 
       // Generate JWT token
       String token = jwtService.generateToken(savedUser.getUsername(), savedUser.getId());
@@ -66,29 +66,35 @@ public class OwnerAuthController {
    public ResponseEntity<?> loginFootsal(
          @Validated(UserValidation.OwnerLoginGroup.class) @RequestBody OwnerModel request) {
 
+      Map<String, Object> data = new HashMap<>();
+      Map<String, String> token = new HashMap<>();
+
       // Find the user in the database
-      OwnerModel footsal = footsalRepository.findByUsername(request.getUsername());
-      if (footsal == null) {
+      OwnerModel owner = ownerRepository.findByUsername(request.getUsername());
+      if (owner == null) {
          ApiResponse<Map<String, Object>> response = new ApiResponse<>("user doesn't exists", 400, false);
          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
       }
 
       // Verify password
-      if (!passwordEncoder.matches(request.getPassword(), footsal.getPassword())) {
-         ApiResponse<Map<String, Object>> response = new ApiResponse<>("password incorrect", 401, false);
-         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+      if (!passwordEncoder.matches(request.getPassword(), owner.getPassword())) {
+         ApiResponse<Map<String, Object>> response = new ApiResponse<>("password incorrect", 400, false);
+         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
       }
 
-      // Generate JWT token
-      String token = jwtService.generateToken(footsal.getUsername(), footsal.getId());
+      // Generate Access & Refresh token
+      String accessToken = jwtService
+            .generateAccessToken(request.getUsername(),
+                  request.getId());
+      String refreshToken = jwtService
+            .generateRefreshToken(request.getUsername(),
+                  request.getId());
 
-      // Return token
-      Map<String, Object> data = new HashMap<>();
+      token.put("access", accessToken);
+      token.put("refresh", refreshToken);
       data.put("token", token);
-      data.put("id", footsal.getId());
-      data.put("username", footsal.getUsername());
-      ApiResponse<Map<String, Object>> response = new ApiResponse<>("Logged in successfully", 200, true, data);
-      return ResponseEntity.ok(response);
+      data.put("user", owner);
+      return ResponseEntity.ok(new ApiResponse<>("You are logged in", 200, true, data));
    }
 
 }
