@@ -20,7 +20,10 @@ public class SimpleSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers(
+                            "/api/**",
+                            "/uploads/**"                
+                            ).permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form.disable());
         return http.build();
