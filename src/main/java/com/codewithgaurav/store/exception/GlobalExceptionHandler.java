@@ -48,4 +48,9 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>("No Such Element Exception: " + ex.getMessage(), 400, false));
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<?> handleUnauthorizedException(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(ex.getMessage(), 401, false));
+    }
+
 }

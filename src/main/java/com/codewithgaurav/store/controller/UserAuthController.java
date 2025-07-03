@@ -88,4 +88,23 @@ public class UserAuthController {
         return ResponseEntity.ok(new ApiResponse<>("Login Successful", 200, true, data));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<?> tokenRefresh(@RequestBody Map<String, String> body) {
+        Map<String, String> token = new HashMap<>();
+
+        String refresh = body.get("refresh");
+        String id = jwtservice.extractId(refresh);
+        if (id != null && !id.isEmpty()) {
+            String username = jwtservice.extractUsername(refresh);
+            String accessToken = jwtservice.generateAccessToken(username, id);
+            String refreshToken = jwtservice.generateRefreshToken(username, id);
+            token.put("access", accessToken);
+            token.put("refresh", refreshToken);
+            return ResponseEntity.ok().body(token);
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiResponse<>("User not authenticated", 401, false));
+    }
+
 }
