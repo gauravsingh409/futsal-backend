@@ -127,4 +127,52 @@ public class FutsalController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponse<>("Futsal retrieved successfully", 200, true, response));
     }
+
+    // get futsal owner
+    @GetMapping(value = "/get")
+    public ResponseEntity<?> getOwnerFutsals(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String search,
+            HttpServletRequest httpServletRequest) {
+
+        String authHeader = httpServletRequest.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer")) {
+            ApiResponse<Map<String, Object>> response = new ApiResponse<>("user not authenticated", 401, false);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        String token = authHeader.substring(7);
+        String id = jwtService.extractId(token);
+        boolean isOwner = service.isOwner(id);
+
+        if (!isOwner)
+            return ResponseEntity.badRequest().body(new ApiResponse<>("You don't have permission", 400, false, null));
+
+        // Validate the page and pageSize
+        if (page < 0 || pageSize <= 0) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>("page or page size is not valid", 400, false));
+        }
+        if (pageSize > 30) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>("page size exceed the limit", 400, false));
+        }
+
+        Pageable pageable = PageRequest.of(page, pageSize,
+                Sort.by("futsal_name").ascending());
+        Page<FutsalModel> futsalPage = service.getOwnerFutsals(id, pageable);
+
+        var response = new PaginatedResponse<>( // java will automatically infer the type of response
+                // PaginatedResponse<FutsalModel> paginatedData = new PaginatedResponse<>(
+                futsalPage.getContent(),
+                futsalPage.getNumber(),
+                futsalPage.getSize(),
+                futsalPage.getTotalElements(),
+                futsalPage.getTotalPages());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>("Futsal retrieved successfully", 200, true,
+                        response));
+    }
+
 }

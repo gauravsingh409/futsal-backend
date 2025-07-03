@@ -21,12 +21,19 @@ public class OwnerModel {
             UserValidation.OwnerLoginGroup.class, UserValidation.OwnerRegisterGroup.class })
     private String username;
 
-    @NotBlank(message = "Password field is missing", groups = { UserValidation.OwnerLoginGroup.class,
-            UserValidation.OwnerRegisterGroup.class })
-    @Size(min = 6, message = "Password must be at least 6 characters long", groups = {
-            UserValidation.OwnerLoginGroup.class, UserValidation.OwnerRegisterGroup.class })
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$", message = "Password must contain uppercase, lowercase, number, and special character", groups = {
-            UserValidation.OwnerLoginGroup.class, UserValidation.OwnerRegisterGroup.class })
+    // @NotBlank(message = "Password field is missing", groups = {
+    // UserValidation.OwnerLoginGroup.class,
+    // UserValidation.OwnerRegisterGroup.class })
+    // @Size(min = 6, message = "Password must be at least 6 characters long",
+    // groups = {
+    // UserValidation.OwnerLoginGroup.class, UserValidation.OwnerRegisterGroup.class
+    // })
+    // @Pattern(regexp =
+    // "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$",
+    // message = "Password must contain uppercase, lowercase, number, and special
+    // character", groups = {
+    // UserValidation.OwnerLoginGroup.class, UserValidation.OwnerRegisterGroup.class
+    // })
     private String password;
 
     @NotBlank(message = "Citizenship number is required", groups = { UserValidation.OwnerRegisterGroup.class })

@@ -51,12 +51,9 @@ public class OwnerAuthController {
       footsal.setPhone_no(request.getPhone_no());
       OwnerModel savedUser = ownerRepository.save(footsal);
 
-      // Generate JWT token
-      String token = jwtService.generateToken(savedUser.getUsername(), savedUser.getId());
       Map<String, Object> data = new HashMap<>();
       data.put("id", savedUser.getId());
       data.put("username", savedUser.getUsername());
-      data.put("token", token);
       ApiResponse<Map<String, Object>> response = new ApiResponse<>("User created successfully", 201, true, data);
 
       return ResponseEntity.ok(response);
@@ -85,10 +82,10 @@ public class OwnerAuthController {
       // Generate Access & Refresh token
       String accessToken = jwtService
             .generateAccessToken(request.getUsername(),
-                  request.getId());
+                  owner.getId());
       String refreshToken = jwtService
             .generateRefreshToken(request.getUsername(),
-                  request.getId());
+                  owner.getId());
 
       token.put("access", accessToken);
       token.put("refresh", refreshToken);

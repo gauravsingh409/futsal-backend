@@ -38,10 +38,15 @@ public class JwtService {
         return Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).getBody().getSubject();
     }
 
+    // Extract the id from token
     public String extractId(String token) {
         try {
-            return Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).getBody().get("id",
-                    String.class);
+            return Jwts.parserBuilder()
+                    .setSigningKey(getKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("id", String.class);
         } catch (JwtException | IllegalArgumentException e) {
             throw new RuntimeException("Invalid or expired jwt token");
         }

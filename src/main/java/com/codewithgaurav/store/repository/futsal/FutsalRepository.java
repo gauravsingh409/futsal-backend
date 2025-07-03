@@ -15,6 +15,8 @@ public interface FutsalRepository extends MongoRepository<FutsalModel, String> {
 
    boolean existsByRegistrationNumber(String registrationNumber); // check does this exists in database or not
 
+   Page<FutsalModel> findByOwner_Id(String ownerId, @NonNull Pageable pageable);
+
    // Get all the futsals with pagination
    @NonNull
    Page<FutsalModel> findAll(@NonNull Pageable pageable);

@@ -143,4 +143,17 @@ public class FutsalService {
             return futsal;
         });
     }
+
+    // owner Futsals
+    public Page<FutsalModel> getOwnerFutsals(String id, Pageable pageable) {
+        Page<FutsalModel> futsalPage;
+
+        futsalPage = futsalRepo.findByOwner_Id(id, pageable);
+
+        return futsalPage.map(futsal -> {
+            futsal.setConverImage("http://localhost:8080" + futsal.getConverImage());
+            return futsal;
+        });
+
+    }
 }
