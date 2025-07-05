@@ -78,9 +78,7 @@ public class JwtService {
                 .setSubject(username)
                 .claim("id", id)
                 .setIssuedAt(new Date())
-                // .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5)) // 5
-                // minutes
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 10)) // 5 minutes
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 100)) // 5
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -91,7 +89,7 @@ public class JwtService {
                 .setSubject(username)
                 .claim("id", id)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7)) // 7 days
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 7 days
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

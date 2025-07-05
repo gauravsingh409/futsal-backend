@@ -128,7 +128,7 @@ public class FutsalController {
                 .body(new ApiResponse<>("Futsal retrieved successfully", 200, true, response));
     }
 
-    // get futsal owner
+    // get logged owner futsal
     @GetMapping(value = "/get")
     public ResponseEntity<?> getOwnerFutsals(
             @RequestParam(defaultValue = "0") int page,
@@ -171,8 +171,7 @@ public class FutsalController {
                 futsalPage.getTotalPages());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new ApiResponse<>("Futsal retrieved successfully", 200, true,
-                        response));
+                .body(new ApiResponse<>("Futsal retrieved successfully", 200, true, response));
     }
 
 }
