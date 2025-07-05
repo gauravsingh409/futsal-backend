@@ -9,6 +9,10 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import com.codewithgaurav.store.validation.FutsalValidation;
+
+import jakarta.validation.constraints.NotBlank;
+
 import java.util.Date;
 import java.util.List;
 
@@ -21,18 +25,14 @@ public class FutsalModel {
     @Field("name")
     private String name;
 
+    @NotBlank(message = "Citizenship number is required", groups = {
+            FutsalValidation.FutsalRegister.class })
     @Field("registration_number")
     @Indexed(unique = true)
     private String registrationNumber;
 
-    @Field("address")
-    private String address;
-
     @Field("location")
     private GeoJsonPoint location;
-
-    @Field("state")
-    private String state;
 
     @Field("district")
     private String district;
@@ -83,28 +83,12 @@ public class FutsalModel {
         this.registrationNumber = registrationNumber;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
     public GeoJsonPoint getLocation() {
         return location;
     }
 
     public void setLocation(GeoJsonPoint location) {
         this.location = location;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
     }
 
     public String getDistrict() {
@@ -173,8 +157,8 @@ public class FutsalModel {
 
     @Override
     public String toString() {
-        return "FutsalModel [id=" + id + ", name=" + name + ", registrationNumber=" + registrationNumber + ", address="
-                + address + ", location=" + location + ", state=" + state + ", district=" + district + ", city=" + city
+        return "FutsalModel [id=" + id + ", name=" + name + ", registrationNumber=" + registrationNumber + ", location="
+                + location + ", district=" + district + ", city=" + city
                 + ", images=" + images + ", converImage=" + converImage + ", registrationPhoto=" + registrationPhoto
                 + ", owner=" + owner + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
     }
