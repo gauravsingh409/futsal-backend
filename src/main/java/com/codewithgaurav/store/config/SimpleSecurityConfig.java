@@ -21,9 +21,9 @@ public class SimpleSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                            "/api/**",
-                            "/uploads/**"                
-                            ).permitAll()
+                                "/api/**",
+                                "/uploads/**")
+                        .permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form.disable());
         return http.build();
