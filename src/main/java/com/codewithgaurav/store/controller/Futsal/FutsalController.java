@@ -7,6 +7,8 @@ import com.codewithgaurav.store.payload.PaginatedResponse;
 import com.codewithgaurav.store.services.FutsalService;
 import com.codewithgaurav.store.services.JwtService;
 import com.codewithgaurav.store.validation.FutsalValidation;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,6 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -86,7 +90,6 @@ public class FutsalController {
             if (!isDataStored)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new ApiResponse<>("some Error occured while saving the data", 400, false));
-
             // Data successfully store to databse
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new ApiResponse<>("Futsal Registered successfully", 200, true, request));
@@ -115,7 +118,7 @@ public class FutsalController {
 
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("name").ascending());
         Page<FutsalModel> futsalPage = service.searchFutsals(search, pageable);
-
+        System.out.println(futsalPage.toString());
         var response = new PaginatedResponse<>( // java will automatically infer the type of response
                 // PaginatedResponse<FutsalModel> paginatedData = new PaginatedResponse<>(
                 futsalPage.getContent(),
@@ -123,7 +126,6 @@ public class FutsalController {
                 futsalPage.getSize(),
                 futsalPage.getTotalElements(),
                 futsalPage.getTotalPages());
-
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponse<>("Futsal retrieved successfully", 200, true, response));
     }
@@ -191,6 +193,12 @@ public class FutsalController {
         if (isOwner) {
             FutsalModel futsal = service.getFutsalDetails(futsalId);
             FutsalDetailsDto data = service.convertToFutsalDto(futsal);
+            try {
+                System.out.println(new ObjectMapper().writeValueAsString(data));
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+
             return ResponseEntity.ok().body(new ApiResponse<>("Futsal details retrieved", 200, true, data));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -257,6 +265,30 @@ public class FutsalController {
                     .body(new ApiResponse<>("Permission Not Allowed", 401, false));
 
         }
+    }
+
+    // delete the futsal
+    @DeleteMapping(value = "/delete/{id}")
+    public ResponseEntity<?> deleteFutsalById(
+            @PathVariable("id") String futsalId,
+            HttpServletRequest httpServletRequest) {
+        String authHeader = httpServletRequest.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer")) {
+            ApiResponse<Map<String, Object>> response = new ApiResponse<>("user not authenticated", 401, false);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        String token = authHeader.substring(7);
+        String id = jwtService.extractId(token);
+        boolean isOwner = service.isOwner(id);
+
+        if (!isOwner)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse<>("Permission Not Allowed", 401, false));
+        Boolean isDeleted = service.deleteFutsalById(futsalId);
+        if (!isDeleted)
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(String.format("futsal %s not found", futsalId), 400, false));
+        return ResponseEntity.ok().body(new ApiResponse<>());
     }
 
 }

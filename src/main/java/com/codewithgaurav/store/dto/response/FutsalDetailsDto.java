@@ -113,4 +113,13 @@ public class FutsalDetailsDto {
    public void setUpdatedAt(Date updatedAt) {
       this.updatedAt = updatedAt;
    }
+
+   @Override
+   public String toString() {
+      return "FutsalDetailsDto [id=" + id + ", name=" + name + ", registrationNumber=" + registrationNumber
+            + ", location=" + location + ", district=" + district + ", city=" + city + ", images=" + images
+            + ", converImage=" + converImage + ", registrationPhoto=" + registrationPhoto + ", owner=" + owner
+            + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
+   }
+
 }

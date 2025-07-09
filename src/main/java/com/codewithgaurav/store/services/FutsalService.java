@@ -226,4 +226,14 @@ public class FutsalService {
         return true;
     }
 
+    // delete the futsal
+    public boolean deleteFutsalById(String futsalId) {
+
+        if (futsalRepo.existsById(futsalId)) {
+            futsalRepo.deleteById(futsalId);
+            return true;
+        } else
+            return false;
+    }
+
 }
