@@ -5,16 +5,22 @@ import java.util.Date;
 
 import io.jsonwebtoken.JwtException;
 import org.springframework.stereotype.Service;
-
 import com.codewithgaurav.store.exception.UnauthorizedException;
+import com.codewithgaurav.store.model.UserModel;
+import com.codewithgaurav.store.repository.UserRepository;
 import com.codewithgaurav.store.security.AuthResult;
-
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class JwtService {
+    private final UserRepository userRepository;
+
+    public JwtService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     private Key getKey() {
         // keyshmacShaKeyFor -> build a cryptographic key signing the toke
@@ -70,6 +76,21 @@ public class JwtService {
         } catch (Exception e) {
             return new AuthResult(false, null, token + " is not a valid authorization token");
         }
+    }
+
+    // is logged user is admin
+    public boolean isAdmin(String userId) {
+        UserModel user = userRepository.findById(userId).get();
+        return user.isIs_admin();
+    }
+
+    // extract token
+    public String extractToken(HttpServletRequest httpServletRequest) {
+        String authHeader = httpServletRequest.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer"))
+            return "";
+        String token = authHeader.substring(7);
+        return token;
     }
 
     // Generate Access Token: valid for 5 minutes
