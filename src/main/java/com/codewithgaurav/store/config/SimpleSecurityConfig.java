@@ -20,6 +20,7 @@ public class SimpleSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
                                 "/api/**",
                                 "/uploads/**",
                                 "/swagger-ui/**",
