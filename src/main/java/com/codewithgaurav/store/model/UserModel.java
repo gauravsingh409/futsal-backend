@@ -26,6 +26,7 @@ public class UserModel {
       private String profileImageUrl;
       private boolean is_user = true;
       private boolean is_owner = false;
+      private boolean is_admin = false;
 
       public String getId() {
             return id;
@@ -145,6 +146,14 @@ public class UserModel {
 
       public void setIs_owner(boolean is_owner) {
             this.is_owner = is_owner;
+      }
+
+      public boolean isIs_admin() {
+            return is_admin;
+      }
+
+      public void setIs_admin(boolean is_admin) {
+            this.is_admin = is_admin;
       }
 
 }

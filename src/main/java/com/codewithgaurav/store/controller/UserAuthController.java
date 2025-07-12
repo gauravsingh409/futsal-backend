@@ -1,6 +1,7 @@
 package com.codewithgaurav.store.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.codewithgaurav.store.validation.UserValidation;
@@ -8,6 +9,7 @@ import com.codewithgaurav.store.validation.UserValidation;
 import io.swagger.v3.oas.annotations.Operation;
 // import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +25,8 @@ import com.codewithgaurav.store.services.JwtService;
 // import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
-@RequestMapping("/api/auth") // Base path for all methods in this controller
-@Tag(name = "User", description = "Endpoints for managing users")
+@RequestMapping("/api/") // Base path for all methods in this controller
+@Tag(name = "User", description = "Endpoints for users")
 public class UserAuthController {
 
     private final UserRepository userRepository;
@@ -39,7 +41,7 @@ public class UserAuthController {
     }
 
     @Operation(summary = "Register User", description = "Register User")
-    @PostMapping("/register") // Becomes /api/auth/user/register
+    @PostMapping("/auth/register") // Becomes /api/auth/user/register
     public ResponseEntity<?> registerUser(
             @Validated(UserValidation.UserRegisterGroup.class) @RequestBody UserModel request) {
         Map<String, Object> data = new HashMap<>();
@@ -68,7 +70,7 @@ public class UserAuthController {
                 .body(new ApiResponse<>("User Created Successfully", 201, false, savedUserModel));
     }
 
-    @PostMapping("/login") // Becomes /api/auth/register
+    @PostMapping("/auth/login") // Becomes /api/auth/register
     public ResponseEntity<?> authenticateUser(
             @Validated(UserValidation.UserLoginGroup.class) @RequestBody UserModel userAuthDTO) {
         Map<String, Object> data = new HashMap<>();
@@ -97,7 +99,7 @@ public class UserAuthController {
         return ResponseEntity.ok(new ApiResponse<>("Login Successful", 200, true, data));
     }
 
-    @PostMapping("/owner/register") // become /api/auth/futsal/register
+    @PostMapping("/auth/owner/register") // become /api/auth/futsal/register
     public ResponseEntity<?> registerFutsal(
             @Validated(UserValidation.OwnerRegisterGroup.class) @RequestBody UserRequestDto request) {
         // Check if the username exists
@@ -125,7 +127,7 @@ public class UserAuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/owner/login")
+    @PostMapping("/auth/owner/login")
     public ResponseEntity<?> loginFootsal(
             @Validated(UserValidation.OwnerLoginGroup.class) @RequestBody UserRequestDto request) {
 
@@ -160,7 +162,7 @@ public class UserAuthController {
         return ResponseEntity.ok(new ApiResponse<>("You are logged in", 200, true, data));
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/auth/refresh")
     public ResponseEntity<?> tokenRefresh(@RequestBody Map<String, String> body) {
         Map<String, String> token = new HashMap<>();
 
@@ -177,6 +179,21 @@ public class UserAuthController {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ApiResponse<>("User not authenticated", 401, false));
+    }
+
+    @GetMapping(value = "/user/get-all")
+    public ResponseEntity<?> getAllUsers(HttpServletRequest httpServletRequest) {
+        String token = jwtService.extractToken(httpServletRequest);
+        if (token == null || token.isEmpty())
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new ApiResponse<>("Authentical Creadential not provided", 401, false));
+        String userId = jwtService.extractId(token);
+        Boolean isAdmin = jwtService.isAdmin(userId);
+        if (!isAdmin)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new ApiResponse<>("Permission not allowed", 401, false));
+        List<UserModel> users = userRepository.findAll();
+        return ResponseEntity.ok().body(new ApiResponse<>("User retrieved successfully", 200, true, users));
     }
 
 }
