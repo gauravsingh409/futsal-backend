@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.codewithgaurav.store.validation.UserValidation;
+
+import io.swagger.v3.oas.annotations.Operation;
+// import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,9 +19,11 @@ import com.codewithgaurav.store.model.UserModel;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.repository.UserRepository;
 import com.codewithgaurav.store.services.JwtService;
+// import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
-@RequestMapping("/api/auth/user") // Base path for all methods in this controller
+@RequestMapping("/api/auth") // Base path for all methods in this controller
+@Tag(name = "User Management", description = "Endpoints for managing users")
 public class UserAuthController {
 
     private final UserRepository userRepository;
@@ -30,7 +37,8 @@ public class UserAuthController {
         this.jwtservice = jwtService;
     }
 
-    @PostMapping("/register") // Becomes /api/auth/register
+    @Operation(summary = "Get user by ID", description = "Returns a single user")
+    @PostMapping("/register") // Becomes /api/auth/user/register
     public ResponseEntity<?> registerUser(
             @Validated(UserValidation.UserRegisterGroup.class) @RequestBody UserModel request) {
         Map<String, Object> data = new HashMap<>();
