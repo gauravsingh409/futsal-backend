@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 
+import com.codewithgaurav.store.dto.request.UserRequestDto;
 import com.codewithgaurav.store.model.UserModel;
 import com.codewithgaurav.store.validation.UserValidation;
 import org.slf4j.Logger;
@@ -19,8 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.services.JwtService;
 import com.codewithgaurav.store.services.UserService;
@@ -35,7 +34,6 @@ import jakarta.servlet.http.HttpServletRequest;
 public class CompleteProfileController {
     private static final Logger logger = LoggerFactory.getLogger(CompleteProfileController.class);
 
-
     @Autowired
     UserService service;
 
@@ -46,7 +44,9 @@ public class CompleteProfileController {
     ObjectMapper objectMapper;
 
     @PutMapping(value = "/owner", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> ownerCompleteProfile(@RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) OwnerModel request, @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> ownerCompleteProfile(
+            @RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) UserRequestDto request,
+            @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
 
         try {
             String authHeader = httpRequest.getHeader("Authorization");
@@ -84,12 +84,12 @@ public class CompleteProfileController {
                 throw new RuntimeException(e.getMessage());
             }
 
-            //  Set the profile image path before saving to DB
+            // Set the profile image path before saving to DB
             String imageUrl = "/uploads/owners/" + fileName; // This should be a relative path
             request.setProfileImageUrl(imageUrl);
 
-            //  Save updated data to DB
-            OwnerModel updatedOwner = service.updateOwnerDetails(id, request);
+            // Save updated data to DB
+            UserModel updatedOwner = service.updateOwnerDetails(id, request);
 
             return ResponseEntity.ok().body(new ApiResponse<>("Profile update successfully", 200, true, updatedOwner));
 
@@ -102,7 +102,9 @@ public class CompleteProfileController {
     }
 
     @PutMapping(value = "/user", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> userCompleteProfile(@RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) UserModel request, @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> userCompleteProfile(
+            @RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) UserModel request,
+            @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
         String authHeader = httpRequest.getHeader("Authorization");
         // check if token is present
         if (authHeader == null || !authHeader.startsWith("Bearer")) {
@@ -137,6 +139,7 @@ public class CompleteProfileController {
         request.setProfile_picture("/uploads/users/" + fileName);
 
         UserModel updateUser = service.updateUserProfile(id, request);
-        return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<>("Profile updates successfully", 200, true, updateUser));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>("Profile updates successfully", 200, true, updateUser));
     }
 }

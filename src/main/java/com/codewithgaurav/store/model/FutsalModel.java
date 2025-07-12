@@ -51,7 +51,7 @@ public class FutsalModel {
 
     @Field("owner")
     @DBRef
-    private OwnerModel owner;
+    private UserModel owner;
 
     @CreatedDate
     private Date createdAt;
@@ -123,11 +123,19 @@ public class FutsalModel {
         this.converImage = converImage;
     }
 
-    public OwnerModel getOwner() {
+    public String getRegistrationPhoto() {
+        return registrationPhoto;
+    }
+
+    public void setRegistrationPhoto(String registrationPhoto) {
+        this.registrationPhoto = registrationPhoto;
+    }
+
+    public UserModel getOwner() {
         return owner;
     }
 
-    public void setOwner(OwnerModel owner) {
+    public void setOwner(UserModel owner) {
         this.owner = owner;
     }
 
@@ -145,22 +153,6 @@ public class FutsalModel {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public String getRegistrationPhoto() {
-        return registrationPhoto;
-    }
-
-    public void setRegistrationPhoto(String registrationPhoto) {
-        this.registrationPhoto = registrationPhoto;
-    }
-
-    @Override
-    public String toString() {
-        return "FutsalModel [id=" + id + ", name=" + name + ", registrationNumber=" + registrationNumber + ", location="
-                + location + ", district=" + district + ", city=" + city
-                + ", images=" + images + ", converImage=" + converImage + ", registrationPhoto=" + registrationPhoto
-                + ", owner=" + owner + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
     }
 
 }

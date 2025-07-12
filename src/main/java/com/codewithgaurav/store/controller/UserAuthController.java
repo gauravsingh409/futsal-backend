@@ -23,7 +23,7 @@ import com.codewithgaurav.store.services.JwtService;
 
 @RestController
 @RequestMapping("/api/auth") // Base path for all methods in this controller
-@Tag(name = "User Management", description = "Endpoints for managing users")
+@Tag(name = "User", description = "Endpoints for managing users")
 public class UserAuthController {
 
     private final UserRepository userRepository;

@@ -7,9 +7,8 @@ import com.codewithgaurav.store.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.codewithgaurav.store.dto.request.UserRequestDto;
 import com.codewithgaurav.store.exception.ResourceNotFoundException;
-import com.codewithgaurav.store.model.Address;
-import com.codewithgaurav.store.model.OwnerModel;
 import com.codewithgaurav.store.repository.profile.OwnerCompleteProfileRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +26,7 @@ public class UserService {
     ObjectMapper objectMapper;
 
     public String findDetailsById(String id) throws JsonProcessingException {
-        OwnerModel owner = repo.findById(id)
+        UserModel owner = repo.findById(id)
                 // .get();
                 .orElseThrow(() -> new ResourceNotFoundException("owner", "id", id));
         // System.out.println(owner); // it will give the java object memory reference
@@ -66,8 +65,8 @@ public class UserService {
         return userRepo.save(user);
     }
 
-    public OwnerModel updateOwnerDetails(String id, OwnerModel request) {
-        OwnerModel existingOwner = repo.findById(id)
+    public UserModel updateOwnerDetails(String id, UserRequestDto request) {
+        UserModel existingOwner = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Owner", "id", id));
 
         // update field
@@ -97,37 +96,6 @@ public class UserService {
             existingOwner.setProfileImageUrl(request.getProfileImageUrl());
         }
 
-        // Address
-        if (request.getAddress() != null) {
-            Address existingAddress = existingOwner.getAddress();
-
-            if (existingAddress == null) {
-                existingAddress = new Address();
-                existingOwner.setAddress(existingAddress);
-            }
-
-            Address requestAddress = request.getAddress();
-
-            if (requestAddress.getStreet() != null && !requestAddress.getStreet().isEmpty()) {
-                existingAddress.setStreet(requestAddress.getStreet());
-            }
-
-            if (requestAddress.getCity() != null && !requestAddress.getCity().isEmpty()) {
-                existingAddress.setCity(requestAddress.getCity());
-            }
-
-            if (requestAddress.getProvince() != null && !requestAddress.getProvince().isEmpty()) {
-                existingAddress.setProvince(requestAddress.getProvince());
-            }
-
-            if (requestAddress.getCountry() != null && !requestAddress.getCountry().isEmpty()) {
-                existingAddress.setCountry(requestAddress.getCountry());
-            }
-
-            if (requestAddress.getPostalCode() != null && !requestAddress.getPostalCode().isEmpty()) {
-                existingAddress.setPostalCode(requestAddress.getPostalCode());
-            }
-        }
         // save
         return repo.save(existingOwner);
     }
