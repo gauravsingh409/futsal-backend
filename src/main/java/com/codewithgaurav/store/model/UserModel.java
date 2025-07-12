@@ -1,142 +1,150 @@
 package com.codewithgaurav.store.model;
 
-import com.codewithgaurav.store.validation.UserValidation;
-import jakarta.validation.constraints.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "user")
+import java.time.LocalDate;
 
+@Document(collection = "users") // Maps this class to a MongoDB collection named "users"
 public class UserModel {
 
-   @Id
-   private String id;
+      @Id
+      private String id;
+      private String username;
+      private String password;
+      private String email;
+      private String address; // Simple String for User address
+      private String phone_no;
+      private String profile_picture; // optional for User
 
-   @NotBlank(message = "Username is required", groups = { UserValidation.UserRegisterGroup.class,
-         UserValidation.UserLoginGroup.class })
-   private String username;
+      // Owner specific fields
+      private String citizenshipNumber;
+      private String owner_phone_no;
+      private String fullName;
+      private LocalDate dateOfBirth;
+      private String emergencyContact;
+      private String profileImageUrl;
+      private boolean is_user = true;
+      private boolean is_owner = false;
 
-   @NotBlank(message = "Password is required", groups = { UserValidation.UserLoginGroup.class,
-         UserValidation.UserRegisterGroup.class })
-   @Size(min = 6, message = "Password must be at least 6 characters")
-   private String password;
+      public String getId() {
+            return id;
+      }
 
-   @NotBlank(message = "Email is required", groups = { UserValidation.UserCompleteProfileGroup.class })
-   @Email(message = "Invalid email format", groups = { UserValidation.UserCompleteProfileGroup.class })
-   private String email;
+      public void setId(String id) {
+            this.id = id;
+      }
 
-   private String profile_picture; // optional, no validation
+      public String getUsername() {
+            return username;
+      }
 
-   @NotBlank(message = "Address is required", groups = { UserValidation.UserCompleteProfileGroup.class })
-   private String address;
+      public void setUsername(String username) {
+            this.username = username;
+      }
 
-   private boolean is_user = true;
-   private boolean is_owner = false;
+      public String getPassword() {
+            return password;
+      }
 
-   public boolean isIs_user() {
-      return is_user;
-   }
+      public void setPassword(String password) {
+            this.password = password;
+      }
 
-   public void setIs_user(boolean is_user) {
-      this.is_user = is_user;
-   }
+      public String getEmail() {
+            return email;
+      }
 
-   public boolean isIs_owner() {
-      return is_owner;
-   }
+      public void setEmail(String email) {
+            this.email = email;
+      }
 
-   public void setIs_owner(boolean is_owner) {
-      this.is_owner = is_owner;
-   }
+      public String getAddress() {
+            return address;
+      }
 
-   @NotBlank(message = "Phone number is required", groups = { UserValidation.UserCompleteProfileGroup.class })
-   @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Invalid phone number format")
-   private String phone_no;
+      public void setAddress(String address) {
+            this.address = address;
+      }
 
-   public String getEmail() {
-      return email;
-   }
+      public String getPhone_no() {
+            return phone_no;
+      }
 
-   public void setEmail(String email) {
-      this.email = email;
-   }
+      public void setPhone_no(String phone_no) {
+            this.phone_no = phone_no;
+      }
 
-   public String getProfile_picture() {
-      return profile_picture;
-   }
+      public String getProfile_picture() {
+            return profile_picture;
+      }
 
-   public void setProfile_picture(String profile_picture) {
-      this.profile_picture = profile_picture;
-   }
+      public void setProfile_picture(String profile_picture) {
+            this.profile_picture = profile_picture;
+      }
 
-   public String getAddress() {
-      return address;
-   }
+      public String getCitizenshipNumber() {
+            return citizenshipNumber;
+      }
 
-   public void setAddress(String address) {
-      this.address = address;
-   }
+      public void setCitizenshipNumber(String citizenshipNumber) {
+            this.citizenshipNumber = citizenshipNumber;
+      }
 
-   public String getPhone_no() {
-      return phone_no;
-   }
+      public String getOwner_phone_no() {
+            return owner_phone_no;
+      }
 
-   public void setPhone_no(String phone_no) {
-      this.phone_no = phone_no;
-   }
+      public void setOwner_phone_no(String owner_phone_no) {
+            this.owner_phone_no = owner_phone_no;
+      }
 
-   public boolean isVerified() {
-      return isVerified;
-   }
+      public String getFullName() {
+            return fullName;
+      }
 
-   public void setVerified(boolean verified) {
-      isVerified = verified;
-   }
+      public void setFullName(String fullName) {
+            this.fullName = fullName;
+      }
 
-   private boolean isVerified;
+      public LocalDate getDateOfBirth() {
+            return dateOfBirth;
+      }
 
-   // constructor
-   public UserModel() {
-   }
+      public void setDateOfBirth(LocalDate dateOfBirth) {
+            this.dateOfBirth = dateOfBirth;
+      }
 
-   // Getters and Setters
-   public String getId() {
-      return id;
-   }
+      public String getEmergencyContact() {
+            return emergencyContact;
+      }
 
-   public String getUsername() {
-      return username;
-   }
+      public void setEmergencyContact(String emergencyContact) {
+            this.emergencyContact = emergencyContact;
+      }
 
-   public String getPassword() {
-      return password;
-   }
+      public String getProfileImageUrl() {
+            return profileImageUrl;
+      }
 
-   public void setId(String id) {
-      this.id = id;
-   }
+      public void setProfileImageUrl(String profileImageUrl) {
+            this.profileImageUrl = profileImageUrl;
+      }
 
-   public void setUsername(String username) {
-      this.username = username.toLowerCase();
-   }
+      public boolean isIs_user() {
+            return is_user;
+      }
 
-   public void setPassword(String password) {
-      this.password = password;
-   }
+      public void setIs_user(boolean is_user) {
+            this.is_user = is_user;
+      }
 
-   @Override
-   public String toString() {
-      return "UserModel{" +
-            "id='" + id + '\'' +
-            ", username='" + username + '\'' +
-            ", password='" + password + '\'' +
-            ", email='" + email + '\'' +
-            ", profile_picture='" + profile_picture + '\'' +
-            ", address='" + address + '\'' +
-            ", is_user=" + is_user +
-            ", is_owner=" + is_owner +
-            ", phone_no='" + phone_no + '\'' +
-            ", isVerified=" + isVerified +
-            '}';
-   }
+      public boolean isIs_owner() {
+            return is_owner;
+      }
+
+      public void setIs_owner(boolean is_owner) {
+            this.is_owner = is_owner;
+      }
+
 }

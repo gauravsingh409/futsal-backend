@@ -3,8 +3,8 @@ package com.codewithgaurav.store.services;
 import com.codewithgaurav.store.dto.response.FutsalDetailsDto;
 import com.codewithgaurav.store.exception.ResourceNotFoundException;
 import com.codewithgaurav.store.model.FutsalModel;
-import com.codewithgaurav.store.model.OwnerModel;
-import com.codewithgaurav.store.repository.OwnerRepository;
+import com.codewithgaurav.store.model.UserModel;
+import com.codewithgaurav.store.repository.UserRepository;
 import com.codewithgaurav.store.repository.futsal.FutsalRepository;
 
 import org.modelmapper.ModelMapper;
@@ -27,7 +27,7 @@ import java.util.UUID;
 public class FutsalService {
 
     @Autowired
-    OwnerRepository repo;
+    UserRepository repo;
 
     @Autowired
     FutsalRepository futsalRepo;
@@ -35,8 +35,8 @@ public class FutsalService {
     // IS Requested user is Owner
     public boolean isOwner(String id) {
         // isPresent return true if the user found else false
-        Optional<OwnerModel> owner = repo.findById(id);
-        return owner.map(OwnerModel::isIs_owner).orElse(false);
+        Optional<UserModel> user = repo.findById(id);
+        return user.get().isIs_owner();
     }
 
     // Store Cover Image when register
@@ -114,7 +114,7 @@ public class FutsalService {
 
     // Register futsal data (JSON) to database
     public boolean registerFutsalDetailsWithOwnerId(FutsalModel request, String id) {
-        OwnerModel owner = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("user not found"));
+        UserModel owner = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("user not found"));
         request.setOwner(owner);
         FutsalModel saved = futsalRepo.save(request);
         return saved != null && saved.getId() != null;
