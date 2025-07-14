@@ -8,7 +8,10 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
 import com.codewithgaurav.store.payload.ApiResponse;
+
+import jakarta.validation.ConstraintViolationException;
 
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
@@ -55,9 +58,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<?> handleMethodNotAllowedException(HttpRequestMethodNotSupportedException ex) {
-
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(new ApiResponse<>(ex.getMessage(), 405, false));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<?> handleConstraintViolation(ConstraintViolationException ex) {
+        String msz = ex.getLocalizedMessage().substring(ex.getLocalizedMessage().lastIndexOf(".") + 1);
+        return ResponseEntity.status(400).body(new ApiResponse<>(msz, 400, false));
     }
 
 }
