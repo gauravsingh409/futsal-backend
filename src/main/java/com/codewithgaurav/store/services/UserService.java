@@ -2,14 +2,15 @@ package com.codewithgaurav.store.services;
 
 import java.io.File;
 
-import com.codewithgaurav.store.model.UserModel;
 import com.codewithgaurav.store.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.codewithgaurav.store.dto.request.UserRequestDto;
+import com.codewithgaurav.store.entity.UserEntity;
 import com.codewithgaurav.store.exception.ResourceNotFoundException;
-import com.codewithgaurav.store.repository.profile.OwnerCompleteProfileRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -17,16 +18,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class UserService {
 
     @Autowired
-    OwnerCompleteProfileRepository repo;
-
-    @Autowired
-    UserRepository userRepo;
+    UserRepository userRepository;
 
     @Autowired
     ObjectMapper objectMapper;
 
-    public String findDetailsById(String id) throws JsonProcessingException {
-        UserModel owner = repo.findById(id)
+    public String findDetailsById(Long id) throws JsonProcessingException {
+        UserEntity owner = userRepository.findById(id)
                 // .get();
                 .orElseThrow(() -> new ResourceNotFoundException("owner", "id", id));
         // System.out.println(owner); // it will give the java object memory reference
@@ -34,39 +32,40 @@ public class UserService {
         return objectMapper.writeValueAsString(owner);
     }
 
-    public UserModel updateUserProfile(String id, UserModel request) throws RuntimeException {
-        UserModel user = userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+    public UserEntity updateUserProfile(Long id, UserEntity request) throws RuntimeException {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         if (request.getEmail() != null && !request.getEmail().isEmpty())
             user.setEmail(request.getEmail());
         if (request.getAddress() != null && !request.getAddress().isEmpty())
             user.setAddress(request.getAddress());
-        if (request.getPhone_no() != null && !request.getPhone_no().isEmpty())
-            user.setPhone_no(request.getPhone_no());
+        if (request.getPhoneNo() != null && !request.getPhoneNo().isEmpty())
+            user.setPhoneNo(request.getPhoneNo());
 
-        if (user.getProfile_picture() != null && !user.getProfile_picture().isEmpty()) {
-            String oldFilePath = System.getProperty("user.dir") + user.getProfile_picture();
+        if (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) {
+            String oldFilePath = System.getProperty("user.dir") + user.getProfilePicture();
             File oldFile = new File(oldFilePath);
             if (oldFile.exists()) {
                 boolean deleted = oldFile.delete();
                 if (deleted) {
-                    user.setProfile_picture(request.getProfile_picture());
+                    user.setProfilePicture(request.getProfilePicture());
                 } else {
-                    String newFilePath = System.getProperty("user.dir") + request.getProfile_picture();
+                    String newFilePath = System.getProperty("user.dir") + request.getProfilePicture();
                     File newFile = new File(newFilePath);
                     if (newFile.delete()) {
                         throw new RuntimeException("some error occurred");
                     }
                 }
             } else {
-                user.setProfile_picture(request.getProfile_picture());
+                user.setProfilePicture(request.getProfilePicture());
             }
         }
-        return userRepo.save(user);
+        return userRepository.save(user);
     }
 
-    public UserModel updateOwnerDetails(String id, UserRequestDto request) {
-        UserModel existingOwner = repo.findById(id)
+    public UserEntity updateOwnerDetails(Long id, UserRequestDto request) {
+        UserEntity existingOwner = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Owner", "id", id));
 
         // update field
@@ -82,22 +81,28 @@ public class UserService {
         if (request.getDateOfBirth() != null)
             existingOwner.setDateOfBirth(request.getDateOfBirth());
 
-        // Emergency Number
-        if (request.getEmergencyContact() != null && !request.getEmergencyContact().isEmpty())
-            existingOwner.setEmergencyContact(request.getEmergencyContact());
-
         // Profile Picture
         if (request.getProfileImageUrl() != null && !request.getProfileImageUrl().isEmpty()) {
-            String oldImagePath = System.getProperty("user.dir") + existingOwner.getProfileImageUrl();
+            String oldImagePath = System.getProperty("user.dir") + existingOwner.getProfilePicture();
             File oldFile = new File(oldImagePath);
             if (oldFile.exists()) {
                 oldFile.delete();
             }
-            existingOwner.setProfileImageUrl(request.getProfileImageUrl());
+            existingOwner.setProfilePicture(request.getProfileImageUrl());
         }
 
         // save
-        return repo.save(existingOwner);
+        return userRepository.save(existingOwner);
+    }
+
+    public Page<UserEntity> getAllUser(Pageable pageable, String search, String role) {
+        String safeSearch = (search == null) ? "" : search;
+        String safeRole = (role == null) ? "" : role;
+        // return
+        // userRepo.findByRoleContainingIgnoreCaseAndNameContainingIgnoreCase(safeRole,
+        // safeSearch, pageable);
+
+        throw new UnsupportedOperationException("Unimplemented method 'getAllUser'");
     }
 
 }

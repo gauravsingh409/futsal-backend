@@ -2,13 +2,11 @@ package com.codewithgaurav.store.dto.response;
 
 import java.util.Date;
 import java.util.List;
-import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 
 public class FutsalDetailsDto {
    private String id;
    private String name;
    private String registrationNumber;
-   private GeoJsonPoint location;
    private String district;
    private String city;
    private List<String> images;
@@ -40,14 +38,6 @@ public class FutsalDetailsDto {
 
    public void setRegistrationNumber(String registrationNumber) {
       this.registrationNumber = registrationNumber;
-   }
-
-   public GeoJsonPoint getLocation() {
-      return location;
-   }
-
-   public void setLocation(GeoJsonPoint location) {
-      this.location = location;
    }
 
    public String getDistrict() {
@@ -117,7 +107,7 @@ public class FutsalDetailsDto {
    @Override
    public String toString() {
       return "FutsalDetailsDto [id=" + id + ", name=" + name + ", registrationNumber=" + registrationNumber
-            + ", location=" + location + ", district=" + district + ", city=" + city + ", images=" + images
+            + ", district=" + district + ", city=" + city + ", images=" + images
             + ", converImage=" + converImage + ", registrationPhoto=" + registrationPhoto + ", owner=" + owner
             + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
    }

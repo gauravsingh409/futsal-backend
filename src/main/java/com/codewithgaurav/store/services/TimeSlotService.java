@@ -8,10 +8,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.codewithgaurav.store.entity.TimeSlotEntity;
 import com.codewithgaurav.store.exception.ResourceNotFoundException;
-import com.codewithgaurav.store.model.TimeSlotModel;
-import com.codewithgaurav.store.repository.futsal.FutsalRepository;
-import com.codewithgaurav.store.repository.futsal.TimeSlotRepository;
+import com.codewithgaurav.store.repository.FutsalRepository;
+import com.codewithgaurav.store.repository.TimeSlotRepository;
 
 @Service
 public class TimeSlotService {
@@ -23,7 +23,7 @@ public class TimeSlotService {
    private FutsalRepository futsalRepo;
 
    // Save the time slot
-   public TimeSlotModel createTimeSlot(TimeSlotModel timeSlot) {
+   public TimeSlotEntity createTimeSlot(TimeSlotEntity timeSlot) {
       try {
          return timeSlotRepo.save(timeSlot);
       } catch (Exception e) {
@@ -32,7 +32,7 @@ public class TimeSlotService {
    }
 
    // get the time slot
-   public List<TimeSlotModel> getSlotsByFutsal(String futsalId) {
+   public List<TimeSlotEntity> getSlotsByFutsal(Long futsalId) {
       boolean isFutsalExist = futsalRepo.existsById(futsalId);
       if (!isFutsalExist)
          throw new ResourceNotFoundException("futsal with id " + futsalId + " not found");
@@ -40,19 +40,19 @@ public class TimeSlotService {
    }
 
    // Is Futsal TimeSlot exist
-   public boolean isTimeSlotExist(String futsalId, LocalDate date, LocalTime startTime) {
+   public boolean isTimeSlotExist(Long futsalId, LocalDate date, LocalTime startTime) {
       return timeSlotRepo.existsByFutsalIdAndDateAndStartTime(futsalId, date, startTime);
    }
 
    // get details by id
-   public TimeSlotModel getDetailsById(String timeSlotId) {
-      Optional<TimeSlotModel> data = timeSlotRepo.findById(timeSlotId);
+   public TimeSlotEntity getDetailsById(Long timeSlotId) {
+      Optional<TimeSlotEntity> data = timeSlotRepo.findById(timeSlotId);
       return data.get();
    }
 
    // Time SLot Put Update
-   public TimeSlotModel putUpdate(TimeSlotModel request, String timeSlotId) {
-      Optional<TimeSlotModel> existingOptional = timeSlotRepo.findById(timeSlotId);
+   public TimeSlotEntity putUpdate(TimeSlotEntity request, Long timeSlotId) {
+      Optional<TimeSlotEntity> existingOptional = timeSlotRepo.findById(timeSlotId);
       if (existingOptional.isEmpty())
          throw new ResourceNotFoundException("Time Slot with Id " + timeSlotId + "not found");
       // Update the data

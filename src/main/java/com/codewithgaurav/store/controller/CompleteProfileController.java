@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.codewithgaurav.store.dto.request.UserRequestDto;
-import com.codewithgaurav.store.model.UserModel;
+import com.codewithgaurav.store.entity.UserEntity;
 import com.codewithgaurav.store.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public class CompleteProfileController {
             }
 
             String token = authHeader.substring(7);
-            String id = jwtService.extractId(token);
+            Long id = jwtService.extractId(token);
 
             // ✅ Save photo
             String originalFilename = photos.getOriginalFilename();
@@ -89,7 +89,7 @@ public class CompleteProfileController {
             request.setProfileImageUrl(imageUrl);
 
             // Save updated data to DB
-            UserModel updatedOwner = service.updateOwnerDetails(id, request);
+            UserEntity updatedOwner = service.updateOwnerDetails(id, request);
 
             return ResponseEntity.ok().body(new ApiResponse<>("Profile update successfully", 200, true, updatedOwner));
 
@@ -103,7 +103,7 @@ public class CompleteProfileController {
 
     @PutMapping(value = "/user", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> userCompleteProfile(
-            @RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) UserModel request,
+            @RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) UserEntity request,
             @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
         String authHeader = httpRequest.getHeader("Authorization");
         // check if token is present
@@ -112,7 +112,7 @@ public class CompleteProfileController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
         String token = authHeader.substring(7);
-        String id = jwtService.extractId(token);
+        Long id = jwtService.extractId(token);
         String originalFilename = photos.getOriginalFilename();
         String fileExtension = "";
         if (originalFilename != null && originalFilename.contains(".")) {
@@ -136,9 +136,9 @@ public class CompleteProfileController {
             ApiResponse<Map<String, Object>> response = new ApiResponse<>(e.getMessage(), 400, false);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
-        request.setProfile_picture("/uploads/users/" + fileName);
+        request.setProfilePicture("/uploads/users/" + fileName);
 
-        UserModel updateUser = service.updateUserProfile(id, request);
+        UserEntity updateUser = service.updateUserProfile(id, request);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponse<>("Profile updates successfully", 200, true, updateUser));
     }

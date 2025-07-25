@@ -2,7 +2,7 @@ package com.codewithgaurav.store.security;
 
 public class AuthResult {
    private boolean valid;
-   private String userId;
+   private Long userId;
    private String errorMessage;
 
    public boolean isValid() {
@@ -13,11 +13,11 @@ public class AuthResult {
       this.valid = valid;
    }
 
-   public String getUserId() {
+   public Long getUserId() {
       return userId;
    }
 
-   public void setUserId(String userId) {
+   public void setUserId(Long userId) {
       this.userId = userId;
    }
 
@@ -29,7 +29,7 @@ public class AuthResult {
       this.errorMessage = errorMessage;
    }
 
-   public AuthResult(boolean valid, String userId, String errorMessage) {
+   public AuthResult(boolean valid, Long userId, String errorMessage) {
       this.valid = valid;
       this.userId = userId;
       this.errorMessage = errorMessage;

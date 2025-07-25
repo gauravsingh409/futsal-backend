@@ -1,35 +1,43 @@
-package com.codewithgaurav.store.model;
+package com.codewithgaurav.store.entity;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import org.springframework.data.annotation.Id;
+@Entity
+@Table(name = "time_slots") // Table name in PostgreSQL
+public class TimeSlotEntity {
 
-public class TimeSlotModel {
    @Id
-   private String id;
+   @GeneratedValue(strategy = GenerationType.IDENTITY)
+   private Long id;
 
-   private String futsalId; // Reference to the Futsal document
+   @Column(name = "futsal_id", nullable = false)
+   private Long futsalId; // Foreign key reference (can be linked later)
+
    private LocalDate date;
    private LocalTime startTime;
    private LocalTime endTime;
    private Double price;
+
+   @Column(name = "is_booked")
    private boolean isBooked = false;
 
-   // Getter and Setter
-   public String getId() {
+   // Getters and Setters
+
+   public Long getId() {
       return id;
    }
 
-   public void setId(String id) {
+   public void setId(Long id) {
       this.id = id;
    }
 
-   public String getFutsalId() {
+   public Long getFutsalId() {
       return futsalId;
    }
 
-   public void setFutsalId(String futsalId) {
+   public void setFutsalId(Long futsalId) {
       this.futsalId = futsalId;
    }
 
@@ -69,8 +77,7 @@ public class TimeSlotModel {
       return isBooked;
    }
 
-   public void setBooked(boolean isBooked) {
-      this.isBooked = isBooked;
+   public void setBooked(boolean booked) {
+      isBooked = booked;
    }
-
 }

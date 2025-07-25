@@ -3,47 +3,54 @@ package com.codewithgaurav.store.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.codewithgaurav.store.validation.UserValidation;
-
+import com.codewithgaurav.store.validator.ValidRole;
 import io.swagger.v3.oas.annotations.Operation;
-// import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import com.codewithgaurav.store.dto.request.UserRequestDto;
-import com.codewithgaurav.store.model.UserModel;
+import com.codewithgaurav.store.entity.UserEntity;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.repository.UserRepository;
 import com.codewithgaurav.store.services.JwtService;
-// import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import com.codewithgaurav.store.services.UserService;
 
 @RestController
 @RequestMapping("/api/") // Base path for all methods in this controller
 @Tag(name = "User", description = "Endpoints for users")
+@Validated
 public class UserAuthController {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final UserService userService;
 
     public UserAuthController(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder,
-            JwtService jwtService) {
+            JwtService jwtService, UserService userService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.userService = userService;
     }
 
     @Operation(summary = "Register User", description = "Register User")
     @PostMapping("/auth/register") // Becomes /api/auth/user/register
     public ResponseEntity<?> registerUser(
-            @Validated(UserValidation.UserRegisterGroup.class) @RequestBody UserModel request) {
+            @Validated(UserValidation.UserRegisterGroup.class) @RequestBody UserEntity request) {
         Map<String, Object> data = new HashMap<>();
 
         // Validate input
@@ -59,10 +66,10 @@ public class UserAuthController {
         }
 
         // Hash password and save user
-        UserModel newUserModel = new UserModel();
+        UserEntity newUserModel = new UserEntity();
         newUserModel.setUsername(request.getUsername());
         newUserModel.setPassword(passwordEncoder.encode(request.getPassword()));
-        UserModel savedUserModel = userRepository.save(newUserModel);
+        UserEntity savedUserModel = userRepository.save(newUserModel);
 
         data.put("token", savedUserModel);
 
@@ -72,12 +79,12 @@ public class UserAuthController {
 
     @PostMapping("/auth/login") // Becomes /api/auth/register
     public ResponseEntity<?> authenticateUser(
-            @Validated(UserValidation.UserLoginGroup.class) @RequestBody UserModel userAuthDTO) {
+            @Validated(UserValidation.UserLoginGroup.class) @RequestBody UserEntity userAuthDTO) {
         Map<String, Object> data = new HashMap<>();
         Map<String, String> token = new HashMap<>();
 
         // Find user in database
-        UserModel existingUserModel = userRepository.findByUsername(userAuthDTO.getUsername());
+        UserEntity existingUserModel = userRepository.findByUsername(userAuthDTO.getUsername());
         if (existingUserModel == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>("User not found", 400, false));
         }
@@ -109,15 +116,14 @@ public class UserAuthController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         }
 
-        UserModel footsal = new UserModel();
-        footsal.setIs_user(true);
-        footsal.setIs_owner(true);
+        UserEntity footsal = new UserEntity();
+        footsal.setUser(true);
+        footsal.setOwner(true);
         footsal.setUsername(request.getUsername());
         footsal.setPassword(passwordEncoder.encode(request.getPassword()));
         footsal.setCitizenshipNumber(request.getCitizenshipNumber());
-        footsal.setPhone_no(request.getPhone_no());
 
-        UserModel savedUser = userRepository.save(footsal);
+        UserEntity savedUser = userRepository.save(footsal);
 
         Map<String, Object> data = new HashMap<>();
         data.put("id", savedUser.getId());
@@ -135,7 +141,7 @@ public class UserAuthController {
         Map<String, String> token = new HashMap<>();
 
         // Find the user in the database
-        UserModel user = userRepository.findByUsername(request.getUsername());
+        UserEntity user = userRepository.findByUsername(request.getUsername());
         if (user == null) {
             ApiResponse<Map<String, Object>> response = new ApiResponse<>("user doesn't exists", 400, false);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
@@ -167,8 +173,8 @@ public class UserAuthController {
         Map<String, String> token = new HashMap<>();
 
         String refresh = body.get("refresh");
-        String id = jwtService.extractId(refresh);
-        if (id != null && !id.isEmpty()) {
+        Long id = jwtService.extractId(refresh);
+        if (id != null) {
             String username = jwtService.extractUsername(refresh);
             String accessToken = jwtService.generateAccessToken(username, id);
             String refreshToken = jwtService.generateRefreshToken(username, id);
@@ -181,18 +187,26 @@ public class UserAuthController {
                 .body(new ApiResponse<>("User not authenticated", 401, false));
     }
 
-    @GetMapping(value = "/user/get-all")
-    public ResponseEntity<?> getAllUsers(HttpServletRequest httpServletRequest) {
+    @GetMapping(value = "/user/get-all") // admin
+    public ResponseEntity<?> getAllUser(
+            HttpServletRequest httpServletRequest,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int page_size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) @ValidRole(allowed = { "user",
+                    "admin" }, message = "Only admin or owner roles are allowed") String role) {
         String token = jwtService.extractToken(httpServletRequest);
         if (token == null || token.isEmpty())
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     new ApiResponse<>("Authentical Creadential not provided", 401, false));
-        String userId = jwtService.extractId(token);
+        Long userId = jwtService.extractId(token);
         Boolean isAdmin = jwtService.isAdmin(userId);
         if (!isAdmin)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     new ApiResponse<>("Permission not allowed", 401, false));
-        List<UserModel> users = userRepository.findAll();
+        Pageable pageable = PageRequest.of(page, page_size);
+        Page<UserEntity> userPage;
+        List<UserEntity> users = userRepository.findAll();
         return ResponseEntity.ok().body(new ApiResponse<>("User retrieved successfully", 200, true, users));
     }
 
