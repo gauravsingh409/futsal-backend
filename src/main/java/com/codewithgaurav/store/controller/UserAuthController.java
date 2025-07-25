@@ -1,8 +1,14 @@
 package com.codewithgaurav.store.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import com.codewithgaurav.store.validation.UserValidation;
 import com.codewithgaurav.store.validator.ValidRole;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,18 +18,24 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.codewithgaurav.store.dto.request.UserRequestDto;
 import com.codewithgaurav.store.entity.UserEntity;
 import com.codewithgaurav.store.payload.ApiResponse;
+import com.codewithgaurav.store.payload.PaginatedResponse;
 import com.codewithgaurav.store.repository.UserRepository;
 import com.codewithgaurav.store.services.JwtService;
 import com.codewithgaurav.store.services.UserService;
@@ -48,7 +60,7 @@ public class UserAuthController {
     }
 
     @Operation(summary = "Register User", description = "Register User")
-    @PostMapping("/auth/register") // Becomes /api/auth/user/register
+    @PostMapping("/auth/register")
     public ResponseEntity<?> registerUser(
             @Validated(UserValidation.UserRegisterGroup.class) @RequestBody UserEntity request) {
         Map<String, Object> data = new HashMap<>();
@@ -77,7 +89,7 @@ public class UserAuthController {
                 .body(new ApiResponse<>("User Created Successfully", 201, false, savedUserModel));
     }
 
-    @PostMapping("/auth/login") // Becomes /api/auth/register
+    @PostMapping("/auth/login")
     public ResponseEntity<?> authenticateUser(
             @Validated(UserValidation.UserLoginGroup.class) @RequestBody UserEntity userAuthDTO) {
         Map<String, Object> data = new HashMap<>();
@@ -106,7 +118,7 @@ public class UserAuthController {
         return ResponseEntity.ok(new ApiResponse<>("Login Successful", 200, true, data));
     }
 
-    @PostMapping("/auth/owner/register") // become /api/auth/futsal/register
+    @PostMapping("/auth/owner/register")
     public ResponseEntity<?> registerFutsal(
             @Validated(UserValidation.OwnerRegisterGroup.class) @RequestBody UserRequestDto request) {
         // Check if the username exists
@@ -187,7 +199,7 @@ public class UserAuthController {
                 .body(new ApiResponse<>("User not authenticated", 401, false));
     }
 
-    @GetMapping(value = "/user/get-all") // admin
+    @GetMapping(value = "/admin/user/get-all") // admin
     public ResponseEntity<?> getAllUser(
             HttpServletRequest httpServletRequest,
             @RequestParam(defaultValue = "0") int page,
@@ -205,9 +217,111 @@ public class UserAuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     new ApiResponse<>("Permission not allowed", 401, false));
         Pageable pageable = PageRequest.of(page, page_size);
-        Page<UserEntity> userPage;
-        List<UserEntity> users = userRepository.findAll();
-        return ResponseEntity.ok().body(new ApiResponse<>("User retrieved successfully", 200, true, users));
+        Page<UserEntity> users = userRepository.findAll(pageable);
+
+        return ResponseEntity.ok().body(new ApiResponse<>("User retrieved successfully", 200, true,
+                new PaginatedResponse<>(users.getContent(), users.getNumber(), users.getSize(),
+                        users.getTotalElements(), users.getTotalPages())));
+    }
+
+    @PutMapping(value = "/complete-profile/owner", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> ownerCompleteProfile(
+            @RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) UserRequestDto request,
+            @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
+
+        try {
+            String authHeader = httpRequest.getHeader("Authorization");
+
+            // Check if token is present
+            if (authHeader == null || !authHeader.startsWith("Bearer")) {
+                ApiResponse<Map<String, Object>> response = new ApiResponse<>("User not authenticated", 401, false);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            String token = authHeader.substring(7);
+            Long id = jwtService.extractId(token);
+
+            // ✅ Save photo
+            String originalFilename = photos.getOriginalFilename();
+            String fileExtension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+
+            String fileName = UUID.randomUUID() + fileExtension;
+            Path uploadPath = Paths.get(System.getProperty("user.dir"), "uploads", "owners");
+
+            try {
+                Files.createDirectories(uploadPath);
+            } catch (IOException e) {
+                throw new RuntimeException("Could not create upload directory", e);
+            }
+
+            File destination = new File(uploadPath.toFile(), fileName);
+            try {
+                photos.transferTo(destination);
+            } catch (IOException e) {
+                System.out.println("error while saving the file");
+                throw new RuntimeException(e.getMessage());
+            }
+
+            // Set the profile image path before saving to DB
+            String imageUrl = "/uploads/owners/" + fileName; // This should be a relative path
+            request.setProfileImageUrl(imageUrl);
+
+            // Save updated data to DB
+            UserEntity updatedOwner = userService.updateOwnerDetails(id, request);
+
+            return ResponseEntity.ok().body(new ApiResponse<>("Profile update successfully", 200, true, updatedOwner));
+
+        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Token expired", 401, false));
+
+        } catch (io.jsonwebtoken.JwtException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Invalid token", 401, false));
+        }
+    }
+
+    @PutMapping(value = "/complete-profile/user", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> userCompleteProfile(
+            @RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) UserEntity request,
+            @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
+        String authHeader = httpRequest.getHeader("Authorization");
+        // check if token is present
+        if (authHeader == null || !authHeader.startsWith("Bearer")) {
+            ApiResponse<Map<String, Object>> response = new ApiResponse<>("Token not found", 401, false);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        String token = authHeader.substring(7);
+        Long id = jwtService.extractId(token);
+        String originalFilename = photos.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String fileName = UUID.randomUUID() + fileExtension;
+        Path uploadPath = Paths.get(System.getProperty("user.dir"), "uploads", "users");
+
+        try {
+            Files.createDirectories(uploadPath);
+        } catch (IOException e) {
+            ApiResponse<Map<String, Object>> response = new ApiResponse<>(e.getMessage(), 401, false);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        File destination = new File(uploadPath.toFile(), fileName);
+        try {
+            photos.transferTo(destination);
+        } catch (IOException e) {
+            ApiResponse<Map<String, Object>> response = new ApiResponse<>(e.getMessage(), 400, false);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        request.setProfilePicture("/uploads/users/" + fileName);
+
+        UserEntity updateUser = userService.updateUserProfile(id, request);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>("Profile updates successfully", 200, true, updateUser));
     }
 
 }

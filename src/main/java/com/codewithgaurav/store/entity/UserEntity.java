@@ -18,14 +18,11 @@ public class UserEntity {
 
    @Column(nullable = false, unique = true)
    private String username;
-
    private String password;
    private String email;
    private String address;
-
    private String phoneNo;
    private String profilePicture;
-
    // Owner-specific fields
    private String citizenshipNumber;
    private String fullName;
