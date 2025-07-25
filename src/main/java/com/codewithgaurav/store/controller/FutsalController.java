@@ -1,7 +1,7 @@
-package com.codewithgaurav.store.controller.Futsal;
+package com.codewithgaurav.store.controller;
 
 import com.codewithgaurav.store.dto.response.FutsalDetailsDto;
-import com.codewithgaurav.store.model.FutsalModel;
+import com.codewithgaurav.store.entity.FutsalEntity;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.payload.PaginatedResponse;
 import com.codewithgaurav.store.services.FutsalService;
@@ -46,7 +46,7 @@ public class FutsalController {
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> registerFutsal(
             @RequestPart("registration_photo") MultipartFile registraionPhoto,
-            @RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalModel request,
+            @RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalEntity request,
             @RequestPart(value = "images", required = false) MultipartFile[] images,
             @RequestPart("cover_image") MultipartFile coverImage,
             HttpServletRequest httpRequest) {
@@ -56,7 +56,7 @@ public class FutsalController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
         String token = authHeader.substring(7);
-        String id = jwtService.extractId(token);
+        Long id = jwtService.extractId(token);
         boolean isOwner = service.isOwner(id);
 
         if (isOwner) {
@@ -117,10 +117,10 @@ public class FutsalController {
         }
 
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("name").ascending());
-        Page<FutsalModel> futsalPage = service.searchFutsals(search, pageable);
+        Page<FutsalEntity> futsalPage = service.searchFutsals(search, pageable);
         System.out.println(futsalPage.toString());
         var response = new PaginatedResponse<>( // java will automatically infer the type of response
-                // PaginatedResponse<FutsalModel> paginatedData = new PaginatedResponse<>(
+                // PaginatedResponse<FutsalEntity> paginatedData = new PaginatedResponse<>(
                 futsalPage.getContent(),
                 futsalPage.getNumber(),
                 futsalPage.getSize(),
@@ -144,7 +144,7 @@ public class FutsalController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
         String token = authHeader.substring(7);
-        String id = jwtService.extractId(token);
+        Long id = jwtService.extractId(token);
         boolean isOwner = service.isOwner(id);
 
         if (!isOwner)
@@ -162,10 +162,10 @@ public class FutsalController {
 
         Pageable pageable = PageRequest.of(page, pageSize,
                 Sort.by("futsal_name").ascending());
-        Page<FutsalModel> futsalPage = service.getOwnerFutsals(id, pageable);
+        Page<FutsalEntity> futsalPage = service.getOwnerFutsals(id, pageable);
 
         var response = new PaginatedResponse<>( // java will automatically infer the type of response
-                // PaginatedResponse<FutsalModel> paginatedData = new PaginatedResponse<>(
+                // PaginatedResponse<FutsalEntity> paginatedData = new PaginatedResponse<>(
                 futsalPage.getContent(),
                 futsalPage.getNumber(),
                 futsalPage.getSize(),
@@ -179,7 +179,7 @@ public class FutsalController {
     // get futsal details
     @GetMapping(value = "/get/{id}")
     public ResponseEntity<?> getFutsalById(
-            @PathVariable("id") String futsalId,
+            @PathVariable("id") Long futsalId,
             HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer")) {
@@ -187,11 +187,11 @@ public class FutsalController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
         String token = authHeader.substring(7);
-        String id = jwtService.extractId(token);
+        Long id = jwtService.extractId(token);
         boolean isOwner = service.isOwner(id);
 
         if (isOwner) {
-            FutsalModel futsal = service.getFutsalDetails(futsalId);
+            FutsalEntity futsal = service.getFutsalDetails(futsalId);
             FutsalDetailsDto data = service.convertToFutsalDto(futsal);
             try {
                 System.out.println(new ObjectMapper().writeValueAsString(data));
@@ -211,10 +211,10 @@ public class FutsalController {
     public ResponseEntity<?> updateFutsalById(
             // @RequestPart(value = "registration_photo", required = false) MultipartFile
             // registraionPhoto,
-            @RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalModel request,
+            @RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalEntity request,
             @RequestPart(value = "images", required = false) MultipartFile[] images,
             @RequestPart(value = "cover_image", required = false) MultipartFile coverImage,
-            @PathVariable("id") String futsalId,
+            @PathVariable("id") Long futsalId,
             HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer")) {
@@ -222,7 +222,7 @@ public class FutsalController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
         String token = authHeader.substring(7);
-        String id = jwtService.extractId(token);
+        Long id = jwtService.extractId(token);
         boolean isOwner = service.isOwner(id);
         if (isOwner) {
             // Delete Images if user has uploaded new images
@@ -270,7 +270,7 @@ public class FutsalController {
     // delete the futsal
     @DeleteMapping(value = "/delete/{id}")
     public ResponseEntity<?> deleteFutsalById(
-            @PathVariable("id") String futsalId,
+            @PathVariable("id") Long futsalId,
             HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer")) {
@@ -278,7 +278,7 @@ public class FutsalController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
         String token = authHeader.substring(7);
-        String id = jwtService.extractId(token);
+        Long id = jwtService.extractId(token);
         boolean isOwner = service.isOwner(id);
 
         if (!isOwner)

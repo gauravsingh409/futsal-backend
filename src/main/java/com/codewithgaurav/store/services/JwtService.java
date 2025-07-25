@@ -5,8 +5,9 @@ import java.util.Date;
 
 import io.jsonwebtoken.JwtException;
 import org.springframework.stereotype.Service;
+
+import com.codewithgaurav.store.entity.UserEntity;
 import com.codewithgaurav.store.exception.UnauthorizedException;
-import com.codewithgaurav.store.model.UserModel;
 import com.codewithgaurav.store.repository.UserRepository;
 import com.codewithgaurav.store.security.AuthResult;
 import io.jsonwebtoken.Jwts;
@@ -50,14 +51,14 @@ public class JwtService {
     }
 
     // Extract the id from token
-    public String extractId(String token) {
+    public Long extractId(String token) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(getKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody()
-                    .get("id", String.class);
+                    .get("id", Long.class);
         } catch (JwtException | IllegalArgumentException e) {
             throw new UnauthorizedException("Invalid or expired jwt token");
         }
@@ -71,7 +72,7 @@ public class JwtService {
 
         String token = authHeader.substring(7);
         try {
-            String userId = this.extractId(token);
+            Long userId = this.extractId(token);
             return new AuthResult(true, userId, null);
         } catch (Exception e) {
             return new AuthResult(false, null, token + " is not a valid authorization token");
@@ -79,9 +80,9 @@ public class JwtService {
     }
 
     // is logged user is admin
-    public boolean isAdmin(String userId) {
-        UserModel user = userRepository.findById(userId).get();
-        return user.isIs_admin();
+    public boolean isAdmin(Long userId) {
+        UserEntity user = userRepository.findById(userId).get();
+        return user.isAdmin();
     }
 
     // extract token
@@ -94,7 +95,7 @@ public class JwtService {
     }
 
     // Generate Access Token: valid for 5 minutes
-    public String generateAccessToken(String username, String id) {
+    public String generateAccessToken(String username, Long id) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("id", id)
@@ -105,7 +106,7 @@ public class JwtService {
     }
 
     // Generate Refresh Token: valid for 7 days
-    public String generateRefreshToken(String username, String id) {
+    public String generateRefreshToken(String username, Long id) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("id", id)

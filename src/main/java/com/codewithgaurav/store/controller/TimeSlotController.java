@@ -1,4 +1,4 @@
-package com.codewithgaurav.store.controller.Futsal;
+package com.codewithgaurav.store.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.codewithgaurav.store.model.TimeSlotModel;
+
+import com.codewithgaurav.store.entity.TimeSlotEntity;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.security.AuthResult;
 import com.codewithgaurav.store.services.FutsalService;
@@ -37,7 +38,7 @@ public class TimeSlotController {
 
    @PostMapping(value = "/create")
    public ResponseEntity<?> createSlot(
-         @RequestBody TimeSlotModel timeslot,
+         @RequestBody TimeSlotEntity timeslot,
          HttpServletRequest httpRequest) {
       String authHeader = httpRequest.getHeader("Authorization");
       if (authHeader == null || !authHeader.startsWith("Bearer")) {
@@ -45,7 +46,7 @@ public class TimeSlotController {
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
       }
       String token = authHeader.substring(7);
-      String id = jwtService.extractId(token);
+      Long id = jwtService.extractId(token);
       boolean isOwner = futsalService.isOwner(id);
 
       // if not owner return false
@@ -61,28 +62,29 @@ public class TimeSlotController {
          return ResponseEntity.badRequest().body(new ApiResponse<>("Time slot already exists", 400, false));
 
       // process further the details
-      TimeSlotModel data = timeSlotService.createTimeSlot(timeslot);
-      return ResponseEntity.ok().body(new ApiResponse<TimeSlotModel>("Timeslot created successfully", 201, true, data));
+      TimeSlotEntity data = timeSlotService.createTimeSlot(timeslot);
+      return ResponseEntity.ok()
+            .body(new ApiResponse<TimeSlotEntity>("Timeslot created successfully", 201, true, data));
    }
 
    // Get all the time-slot by futsal id
    @GetMapping(value = "/get-all/{futsalId}")
-   public ResponseEntity<?> getAllTimeSlot(@PathVariable String futsalId, HttpServletRequest httpServletRequest) {
-      List<TimeSlotModel> slots = timeSlotService.getSlotsByFutsal(futsalId);
+   public ResponseEntity<?> getAllTimeSlot(@PathVariable Long futsalId, HttpServletRequest httpServletRequest) {
+      List<TimeSlotEntity> slots = timeSlotService.getSlotsByFutsal(futsalId);
       return ResponseEntity.ok().body(new ApiResponse<>("Time slot retrieved successfully", 200, true, slots));
    }
 
    // get time-slot details by id
    @GetMapping(value = "/details/{timeSlotId}")
-   public ResponseEntity<?> getTimeSlotDetails(@PathVariable String timeSlotId, HttpServletRequest httpServletRequest) {
-      TimeSlotModel timeSlot = timeSlotService.getDetailsById(timeSlotId);
+   public ResponseEntity<?> getTimeSlotDetails(@PathVariable Long timeSlotId, HttpServletRequest httpServletRequest) {
+      TimeSlotEntity timeSlot = timeSlotService.getDetailsById(timeSlotId);
       return ResponseEntity.ok().body(new ApiResponse<>("Timeslot Details retrived", 200, true, timeSlot));
    }
 
    @PutMapping("/details/{timeSlotId}")
-   public ResponseEntity<?> updateTimeSlot(@PathVariable String timeSlotId,
+   public ResponseEntity<?> updateTimeSlot(@PathVariable Long timeSlotId,
          HttpServletRequest httpServletRequest,
-         @RequestBody TimeSlotModel request) {
+         @RequestBody TimeSlotEntity request) {
       String authHeader = httpServletRequest.getHeader("Authorization");
       AuthResult result = jwtService.extractUserId(authHeader);
       if (!result.isValid())
@@ -91,7 +93,7 @@ public class TimeSlotController {
 
       // Update into database
 
-      TimeSlotModel data = timeSlotService.putUpdate(request, timeSlotId);
+      TimeSlotEntity data = timeSlotService.putUpdate(request, timeSlotId);
 
       return ResponseEntity.ok().body(new ApiResponse<>("Time slot updated successfully", 200, true, data));
    }
