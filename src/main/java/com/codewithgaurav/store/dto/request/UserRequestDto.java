@@ -23,14 +23,14 @@ public class UserRequestDto {
       })
       private String username;
 
-      @NotBlank(message = "Password is required", groups = {
-                  UserValidation.UserRegisterGroup.class,
-                  UserValidation.OwnerRegisterGroup.class
-      })
-      @Size(min = 6, message = "Password must be at least 6 characters", groups = {
-                  UserValidation.UserRegisterGroup.class,
-                  UserValidation.OwnerRegisterGroup.class
-      })
+      // @NotBlank(message = "Password is required", groups = {
+      // UserValidation.UserRegisterGroup.class,
+      // UserValidation.OwnerRegisterGroup.class
+      // })
+      // @Size(min = 6, message = "Password must be at least 6 characters", groups = {
+      // UserValidation.UserRegisterGroup.class,
+      // UserValidation.OwnerRegisterGroup.class
+      // })
       private String password;
 
       @NotBlank(message = "Email is required", groups = {
