@@ -1,14 +1,15 @@
 package com.codewithgaurav.store.services;
 
-import com.codewithgaurav.store.dto.response.FutsalDetailsDto;
+import com.codewithgaurav.store.dto.response.FutsalResponseDTO;
 import com.codewithgaurav.store.entity.FutsalEntity;
+import com.codewithgaurav.store.entity.FutsalImages;
 import com.codewithgaurav.store.entity.UserEntity;
 import com.codewithgaurav.store.exception.ResourceNotFoundException;
 import com.codewithgaurav.store.repository.FutsalRepository;
 import com.codewithgaurav.store.repository.UserRepository;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ import java.util.UUID;
 
 @Service
 public class FutsalService {
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     @Autowired
     UserRepository userRepository;
@@ -67,7 +71,7 @@ public class FutsalService {
 
     // Store Multiple Image of Futsal
     public boolean storeMultipleImages(MultipartFile[] images, FutsalEntity request) {
-        List<String> storedImages = new ArrayList<>();
+        List<FutsalImages> imageList = new ArrayList<>();
         Path uploadImagesPath = Paths.get(System.getProperty("user.dir"), "uploads", "futsal", "images");
         try {
             Files.createDirectories(uploadImagesPath);
@@ -76,15 +80,18 @@ public class FutsalService {
                 if (originalName == null || !originalName.contains(".")) {
                     continue;
                 }
+                FutsalImages futsalImage = new FutsalImages();
                 String fileExtension = originalName.substring(originalName.lastIndexOf("."));
                 String uniqueFileName = UUID.randomUUID() + fileExtension;
 
                 File destination = new File(uploadImagesPath.toFile(), uniqueFileName);
                 image.transferTo(destination);
                 String imageUrl = "/uploads/futsal/images/" + uniqueFileName;
-                storedImages.add(imageUrl);
+                futsalImage.setImageUrl(imageUrl);
+                futsalImage.setFutsal(request);
+                imageList.add(futsalImage);
             }
-            request.setImages(storedImages);
+            request.setImages(imageList);
             return true;
         } catch (IOException ex) {
             throw new RuntimeException("Failed to store the images");
@@ -116,7 +123,7 @@ public class FutsalService {
     public boolean registerFutsalDetailsWithOwnerId(FutsalEntity request, Long id) {
         UserEntity owner = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("user not found"));
-        // request.setOwner(owner);
+        request.setUser(owner);
         FutsalEntity saved = futsalRepo.save(request);
         return saved != null && saved.getId() != null;
     }
@@ -130,9 +137,7 @@ public class FutsalService {
         existingFutsal.setCity(futsal.getCity());
         existingFutsal.setLatitude(futsal.getLatitude());
         existingFutsal.setLongitude(futsal.getLongitude());
-        if (futsal.getImages() != null && !futsal.getImages().isEmpty()) {
-            existingFutsal.setImages(futsal.getImages());
-        }
+
         if (futsal.getCoverImage() != null && !futsal.getCoverImage().isEmpty()) {
             existingFutsal.setCoverImage(futsal.getCoverImage());
         }
@@ -150,71 +155,79 @@ public class FutsalService {
         return futsalRepo.findAll(pageable);
     }
 
-    // Futsal search with Pagination
-    public Page<FutsalEntity> searchFutsals(String search, Pageable pageable) {
+    // Get Futsal List
+    public Page<FutsalResponseDTO> getFilterFutsal(String search, Pageable pageable) {
         Page<FutsalEntity> futsalPage;
-
-        if (search == null || search.trim().isEmpty())
-            futsalPage = futsalRepo.findAll(pageable); // fallback to all
-        else
-            // futsalPage = futsalRepo.searchByKeyword(search, pageable);
-            futsalPage = futsalRepo.findAll(pageable); // fallback to all
-
+        futsalPage = futsalRepo.findByNameContainingIgnoreCase(search, pageable);
         return futsalPage.map(futsal -> {
-            futsal.setCoverImage("http://localhost:8080" + futsal.getCoverImage());
-            return futsal;
+            FutsalResponseDTO dto = new FutsalResponseDTO();
+            dto.setId(futsal.getId());
+            dto.setName(futsal.getName());
+            dto.setCity(futsal.getCity());
+            dto.setDistrict(futsal.getDistrict());
+            dto.setRegistrationNumber(futsal.getRegistrationNumber());
+            dto.setCoverImage(baseUrl + futsal.getCoverImage());
+            dto.setRegistrationPhoto(baseUrl + futsal.getRegistrationPhoto());
+            if (futsal.getImages() != null) {
+                List<String> images = futsal.getImages().stream().map(img -> baseUrl + img.getImageUrl()).toList();
+                dto.setImageUrls(images);
+            }
+            return dto;
         });
+
     }
 
     // owner Futsals
-    public Page<FutsalEntity> getOwnerFutsals(Long id, Pageable pageable) {
+    public Page<FutsalResponseDTO> getOwnerFutsals(Long id, String search, Pageable pageable) {
         Page<FutsalEntity> futsalPage;
-
-        futsalPage = futsalRepo.findByUser_Id(id, pageable);
-
+        futsalPage = futsalRepo.findByUser_IdAndNameContainingIgnoreCase(id, search, pageable);
         return futsalPage.map(futsal -> {
-            futsal.setCoverImage("http://localhost:8080" + futsal.getCoverImage());
-            return futsal;
+            FutsalResponseDTO dto = new FutsalResponseDTO();
+            dto.setId(futsal.getId());
+            dto.setName(futsal.getName());
+            dto.setCity(futsal.getCity());
+            dto.setDistrict(futsal.getDistrict());
+            dto.setRegistrationNumber(futsal.getRegistrationNumber());
+            dto.setCoverImage(baseUrl + futsal.getCoverImage());
+            dto.setRegistrationPhoto(baseUrl + futsal.getRegistrationPhoto());
+            if (futsal.getImages() != null) {
+                List<String> images = futsal.getImages().stream().map(img -> baseUrl + img.getImageUrl()).toList();
+                dto.setImageUrls(images);
+            }
+            return dto;
         });
 
     }
 
     // get futsal by id
-    public FutsalEntity getFutsalDetails(Long id) {
+    public FutsalResponseDTO getFutsalDetails(Long id) {
         FutsalEntity futsal = futsalRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Futsal not found with ID: " + id));
-        String baseurl = "http://localhost:8080";
-        List<String> updatedImages = futsal.getImages().stream().map(image -> baseurl + image).toList();
-        String coverImage = baseurl + futsal.getCoverImage();
-        String registrationPhoto = baseurl + futsal.getRegistrationPhoto();
-
-        futsal.setRegistrationPhoto(registrationPhoto);
-        futsal.setCoverImage(coverImage);
-        futsal.setImages(updatedImages);
-        return futsal;
-    }
-
-    // convert to FutsalDTO
-    public FutsalDetailsDto convertToFutsalDto(FutsalEntity futsal) {
-        ModelMapper modelMapper = new ModelMapper();
-        FutsalDetailsDto data = modelMapper.map(futsal, FutsalDetailsDto.class);
-
-        // data.setId(futsal.getId());
-        // data.setName(futsal.getName());
-        // data.setOwner;
-        return data;
+        List<String> imageUrls = futsal.getImages().stream().map(img -> baseUrl + img.getImageUrl()).toList();
+        FutsalResponseDTO futsalResponseDTO = new FutsalResponseDTO();
+        futsalResponseDTO.setId(futsal.getId());
+        futsalResponseDTO.setName(futsal.getName());
+        futsalResponseDTO.setCity(futsal.getCity());
+        futsalResponseDTO.setDistrict(futsal.getDistrict());
+        futsalResponseDTO.setLatitude(futsal.getLatitude());
+        futsalResponseDTO.setLongitude(futsal.getLongitude());
+        futsalResponseDTO.setRegistrationNumber(futsal.getRegistrationNumber());
+        futsalResponseDTO.setCoverImage(baseUrl + futsal.getCoverImage());
+        futsalResponseDTO.setRegistrationPhoto(baseUrl + futsal.getRegistrationPhoto());
+        futsalResponseDTO.setImageUrls(imageUrls);
+        return futsalResponseDTO;
     }
 
     // delete futsal images by futsal id
     public boolean deleteFutsalImagesByFutsalId(Long futsalId) {
-        FutsalEntity futsal = futsalRepo.findById(futsalId).get();
-        List<String> images = futsal.getImages();
-        for (String image : images) {
-            File file = new File(image);
-            if (file.exists()) {
-                file.delete();
-            }
-        }
+        // FutsalEntity futsal = futsalRepo.findById(futsalId).get();
+        // List<String> images = futsal.getImages();
+        // for (String image : images) {
+        // File file = new File(image);
+        // if (file.exists()) {
+        // file.delete();
+        // }
+        // }
         return true;
     }
 

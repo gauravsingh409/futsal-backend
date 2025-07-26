@@ -1,13 +1,13 @@
 package com.codewithgaurav.store.controller;
 
-import com.codewithgaurav.store.dto.response.FutsalDetailsDto;
+import com.codewithgaurav.store.dto.response.FutsalResponseDTO;
 import com.codewithgaurav.store.entity.FutsalEntity;
+import com.codewithgaurav.store.entity.FutsalImages;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.payload.PaginatedResponse;
 import com.codewithgaurav.store.services.FutsalService;
 import com.codewithgaurav.store.services.JwtService;
 import com.codewithgaurav.store.validation.FutsalValidation;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -90,9 +91,27 @@ public class FutsalController {
             if (!isDataStored)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new ApiResponse<>("some Error occured while saving the data", 400, false));
+
+            FutsalResponseDTO dto = new FutsalResponseDTO();
+            dto.setId(request.getId());
+            dto.setName(request.getName());
+            dto.setCity(request.getCity());
+            dto.setDistrict(request.getDistrict());
+            dto.setRegistrationNumber(request.getRegistrationNumber());
+            dto.setRegistrationPhoto(request.getRegistrationPhoto());
+            dto.setCoverImage(request.getCoverImage());
+            dto.setLatitude(request.getLatitude());
+            dto.setLongitude(request.getLongitude());
+
+            List<String> imageUrls = request.getImages().stream()
+                    .map(FutsalImages::getImageUrl)
+                    .toList();
+
+            dto.setImageUrls(imageUrls);
+
             // Data successfully store to databse
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponse<>("Futsal Registered successfully", 200, true, request));
+                    .body(new ApiResponse<>("Futsal Registered successfully", 200, true, dto));
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ApiResponse<>("You don't have permission to perform this action", 403, false));
@@ -116,11 +135,12 @@ public class FutsalController {
                     .body(new ApiResponse<>("page size exceed the limit", 400, false));
         }
 
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("name").ascending());
-        Page<FutsalEntity> futsalPage = service.searchFutsals(search, pageable);
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<FutsalResponseDTO> futsalPage = service.getFilterFutsal(search, pageable);
         System.out.println(futsalPage.toString());
-        var response = new PaginatedResponse<>( // java will automatically infer the type of response
-                // PaginatedResponse<FutsalEntity> paginatedData = new PaginatedResponse<>(
+
+        // Java will automatically infer the type of response
+        var response = new PaginatedResponse<>(
                 futsalPage.getContent(),
                 futsalPage.getNumber(),
                 futsalPage.getSize(),
@@ -131,7 +151,7 @@ public class FutsalController {
     }
 
     // get logged owner futsal
-    @GetMapping(value = "/get")
+    @GetMapping(value = "/owner/get")
     public ResponseEntity<?> getOwnerFutsals(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize,
@@ -160,9 +180,8 @@ public class FutsalController {
                     .body(new ApiResponse<>("page size exceed the limit", 400, false));
         }
 
-        Pageable pageable = PageRequest.of(page, pageSize,
-                Sort.by("futsal_name").ascending());
-        Page<FutsalEntity> futsalPage = service.getOwnerFutsals(id, pageable);
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<FutsalResponseDTO> futsalPage = service.getOwnerFutsals(id, search, pageable);
 
         var response = new PaginatedResponse<>( // java will automatically infer the type of response
                 // PaginatedResponse<FutsalEntity> paginatedData = new PaginatedResponse<>(
@@ -191,15 +210,8 @@ public class FutsalController {
         boolean isOwner = service.isOwner(id);
 
         if (isOwner) {
-            FutsalEntity futsal = service.getFutsalDetails(futsalId);
-            FutsalDetailsDto data = service.convertToFutsalDto(futsal);
-            try {
-                System.out.println(new ObjectMapper().writeValueAsString(data));
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-
-            return ResponseEntity.ok().body(new ApiResponse<>("Futsal details retrieved", 200, true, data));
+            FutsalResponseDTO futsal = service.getFutsalDetails(futsalId);
+            return ResponseEntity.ok().body(new ApiResponse<>("Futsal details retrieved", 200, true, futsal));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ApiResponse<>("Permission Not Allowed", 401, false));
@@ -255,11 +267,9 @@ public class FutsalController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new ApiResponse<>("some Error occured while saving the data", 400, false));
 
-            FutsalDetailsDto updateFutsal = service.convertToFutsalDto(request);
-
             // Data successfully store to databse
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponse<>("Futsal Updated successfully", 200, true, updateFutsal));
+                    .body(new ApiResponse<>("Futsal Updated successfully", 200, true, request));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ApiResponse<>("Permission Not Allowed", 401, false));

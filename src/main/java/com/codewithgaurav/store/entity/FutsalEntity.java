@@ -3,11 +3,11 @@ package com.codewithgaurav.store.entity;
 import com.codewithgaurav.store.validation.FutsalValidation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -33,11 +33,8 @@ public class FutsalEntity {
       @Column(name = "city")
       private String city;
 
-      // For storing multiple images, you might use a separate table with @OneToMany
-      @ElementCollection
-      @CollectionTable(name = "futsal_images", joinColumns = @JoinColumn(name = "futsal_id"))
-      @Column(name = "image_url")
-      private List<String> images;
+      @OneToMany(mappedBy = "futsal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+      private List<FutsalImages> images = new ArrayList<>();
 
       @Column(name = "cover_image")
       private String coverImage;
@@ -114,14 +111,6 @@ public class FutsalEntity {
             this.city = city;
       }
 
-      public List<String> getImages() {
-            return images;
-      }
-
-      public void setImages(List<String> images) {
-            this.images = images;
-      }
-
       public String getCoverImage() {
             return coverImage;
       }
@@ -160,6 +149,14 @@ public class FutsalEntity {
 
       public void setUpdatedAt(Date updatedAt) {
             this.updatedAt = updatedAt;
+      }
+
+      public List<FutsalImages> getImages() {
+            return images;
+      }
+
+      public void setImages(List<FutsalImages> images) {
+            this.images = images;
       }
 
 }
