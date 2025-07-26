@@ -13,7 +13,8 @@ public interface FutsalRepository extends JpaRepository<FutsalEntity, Long> {
 
    boolean existsByRegistrationNumber(String registrationNumber); // check does this exists in database or not
 
-   Page<FutsalEntity> findByUser_Id(Long ownerId, @NonNull Pageable pageable);
+   Page<FutsalEntity> findByUser_IdAndNameContainingIgnoreCase(Long ownerId, String keyword,
+         @NonNull Pageable pageable);
 
    // Get all the futsals with pagination
    @NonNull

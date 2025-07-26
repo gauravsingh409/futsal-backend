@@ -158,11 +158,7 @@ public class FutsalService {
     // Get Futsal List
     public Page<FutsalResponseDTO> getFilterFutsal(String search, Pageable pageable) {
         Page<FutsalEntity> futsalPage;
-        // System.out.println("search" + search);
-        if (search == null || search.trim().isEmpty())
-            futsalPage = futsalRepo.findAll(pageable); // fallback to all
-        else
-            futsalPage = futsalRepo.findByNameContainingIgnoreCase(search, pageable);
+        futsalPage = futsalRepo.findByNameContainingIgnoreCase(search, pageable);
         return futsalPage.map(futsal -> {
             FutsalResponseDTO dto = new FutsalResponseDTO();
             dto.setId(futsal.getId());
@@ -182,14 +178,23 @@ public class FutsalService {
     }
 
     // owner Futsals
-    public Page<FutsalEntity> getOwnerFutsals(Long id, Pageable pageable) {
+    public Page<FutsalResponseDTO> getOwnerFutsals(Long id, String search, Pageable pageable) {
         Page<FutsalEntity> futsalPage;
-
-        futsalPage = futsalRepo.findByUser_Id(id, pageable);
-
+        futsalPage = futsalRepo.findByUser_IdAndNameContainingIgnoreCase(id, search, pageable);
         return futsalPage.map(futsal -> {
-            futsal.setCoverImage("http://localhost:8080" + futsal.getCoverImage());
-            return futsal;
+            FutsalResponseDTO dto = new FutsalResponseDTO();
+            dto.setId(futsal.getId());
+            dto.setName(futsal.getName());
+            dto.setCity(futsal.getCity());
+            dto.setDistrict(futsal.getDistrict());
+            dto.setRegistrationNumber(futsal.getRegistrationNumber());
+            dto.setCoverImage(baseUrl + futsal.getCoverImage());
+            dto.setRegistrationPhoto(baseUrl + futsal.getRegistrationPhoto());
+            if (futsal.getImages() != null) {
+                List<String> images = futsal.getImages().stream().map(img -> baseUrl + img.getImageUrl()).toList();
+                dto.setImageUrls(images);
+            }
+            return dto;
         });
 
     }

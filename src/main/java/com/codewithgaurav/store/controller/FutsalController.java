@@ -151,7 +151,7 @@ public class FutsalController {
     }
 
     // get logged owner futsal
-    @GetMapping(value = "/get")
+    @GetMapping(value = "/owner/get")
     public ResponseEntity<?> getOwnerFutsals(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize,
@@ -180,9 +180,8 @@ public class FutsalController {
                     .body(new ApiResponse<>("page size exceed the limit", 400, false));
         }
 
-        Pageable pageable = PageRequest.of(page, pageSize,
-                Sort.by("futsal_name").ascending());
-        Page<FutsalEntity> futsalPage = service.getOwnerFutsals(id, pageable);
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<FutsalResponseDTO> futsalPage = service.getOwnerFutsals(id, search, pageable);
 
         var response = new PaginatedResponse<>( // java will automatically infer the type of response
                 // PaginatedResponse<FutsalEntity> paginatedData = new PaginatedResponse<>(
