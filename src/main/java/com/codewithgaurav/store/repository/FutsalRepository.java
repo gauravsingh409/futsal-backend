@@ -19,13 +19,5 @@ public interface FutsalRepository extends JpaRepository<FutsalEntity, Long> {
    @NonNull
    Page<FutsalEntity> findAll(@NonNull Pageable pageable);
 
-   // @Query("""
-   // SELECT f FROM Futsal f
-   // WHERE LOWER(f.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-   // OR LOWER(f.city) LIKE LOWER(CONCAT('%', :keyword, '%'))
-   // OR LOWER(f.owner) LIKE LOWER(CONCAT('%', :keyword, '%'))
-   // """)
-   // Page<FutsalEntity> searchByKeyword(@Param("keyword") String keyword, Pageable
-   // pageable);
-
+   Page<FutsalEntity> findByNameContainingIgnoreCase(String keyword, Pageable pageable);
 }

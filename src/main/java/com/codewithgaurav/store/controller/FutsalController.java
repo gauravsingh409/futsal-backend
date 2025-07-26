@@ -135,11 +135,12 @@ public class FutsalController {
                     .body(new ApiResponse<>("page size exceed the limit", 400, false));
         }
 
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("name").ascending());
-        Page<FutsalEntity> futsalPage = service.searchFutsals(search, pageable);
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<FutsalResponseDTO> futsalPage = service.getFilterFutsal(search, pageable);
         System.out.println(futsalPage.toString());
-        var response = new PaginatedResponse<>( // java will automatically infer the type of response
-                // PaginatedResponse<FutsalEntity> paginatedData = new PaginatedResponse<>(
+
+        // Java will automatically infer the type of response
+        var response = new PaginatedResponse<>(
                 futsalPage.getContent(),
                 futsalPage.getNumber(),
                 futsalPage.getSize(),
