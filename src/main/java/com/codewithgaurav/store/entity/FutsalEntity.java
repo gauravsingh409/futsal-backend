@@ -22,22 +22,24 @@ public class FutsalEntity {
       @Column(name = "name", nullable = false)
       private String name;
 
+      @Column(name = "city")
+      private String city;
+
+      private String district;
+
       @NotBlank(message = "Citizenship number is required", groups = {
                   FutsalValidation.FutsalRegister.class })
       @Column(name = "registration_number", nullable = false, unique = true)
       private String registrationNumber;
-      private Double latitude;
-      private Double longitude;
-      private String district;
-
-      @Column(name = "city")
-      private String city;
-
-      @OneToMany(mappedBy = "futsal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-      private List<FutsalImages> images = new ArrayList<>();
 
       @Column(name = "cover_image")
       private String coverImage;
+
+      private Double latitude;
+      private Double longitude;
+
+      @OneToMany(mappedBy = "futsal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+      private List<FutsalImages> images = new ArrayList<>();
 
       @Column(name = "registration_photo")
       private String registrationPhoto;

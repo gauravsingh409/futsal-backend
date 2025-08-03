@@ -12,7 +12,7 @@ public class FutsalResponseDTO {
    private String coverImage;
    private Double latitude;
    private Double longitude;
-   private List<String> imageUrls;
+   private List<String> images;
 
    // Getters and setters
    public Long getId() {
@@ -87,11 +87,11 @@ public class FutsalResponseDTO {
       this.longitude = longitude;
    }
 
-   public List<String> getImageUrls() {
-      return imageUrls;
+   public List<String> getImages() {
+      return images;
    }
 
-   public void setImageUrls(List<String> imageUrls) {
-      this.imageUrls = imageUrls;
+   public void setImages(List<String> images) {
+      this.images = images;
    }
 }

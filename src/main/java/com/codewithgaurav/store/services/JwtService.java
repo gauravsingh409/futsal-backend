@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.codewithgaurav.store.entity.UserEntity;
 import com.codewithgaurav.store.exception.UnauthorizedException;
+import com.codewithgaurav.store.exception.customException.NotAuthenticatedException;
 import com.codewithgaurav.store.repository.UserRepository;
 import com.codewithgaurav.store.security.AuthResult;
 import io.jsonwebtoken.Jwts;
@@ -100,7 +101,7 @@ public class JwtService {
                 .setSubject(username)
                 .claim("id", id)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 100)) // 5
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 100 * 100)) // 5
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -114,6 +115,16 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 7 days
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    // is valid user
+    public Long extractValidUserId(HttpServletRequest httpServletRequest) {
+        String authHeader = httpServletRequest.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
+            throw new NotAuthenticatedException("Token not provided");
+        String token = authHeader.substring(7);
+        Long id = this.extractId(token);
+        return id > 0 ? id : null;
     }
 
 }
