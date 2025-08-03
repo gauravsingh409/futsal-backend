@@ -2,6 +2,7 @@ package com.codewithgaurav.store.exception;
 
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -9,6 +10,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.codewithgaurav.store.exception.customException.NotAuthenticatedException;
 import com.codewithgaurav.store.payload.ApiResponse;
 
 import jakarta.validation.ConstraintViolationException;
@@ -66,6 +68,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleConstraintViolation(ConstraintViolationException ex) {
         String msz = ex.getLocalizedMessage().substring(ex.getLocalizedMessage().lastIndexOf(".") + 1);
         return ResponseEntity.status(400).body(new ApiResponse<>(msz, 400, false));
+    }
+
+    @ExceptionHandler(NotAuthenticatedException.class)
+    public ResponseEntity<ApiResponse<?>> handleNotAuthenticatedException(NotAuthenticatedException ex) {
+        return ResponseEntity.status(HttpStatusCode.valueOf(401)).body(new ApiResponse<>(ex.getMessage(), 401, false));
     }
 
 }

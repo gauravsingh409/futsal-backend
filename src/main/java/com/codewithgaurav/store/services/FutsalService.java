@@ -5,6 +5,7 @@ import com.codewithgaurav.store.entity.FutsalEntity;
 import com.codewithgaurav.store.entity.FutsalImages;
 import com.codewithgaurav.store.entity.UserEntity;
 import com.codewithgaurav.store.exception.ResourceNotFoundException;
+import com.codewithgaurav.store.mapper.FutsalMapper;
 import com.codewithgaurav.store.repository.FutsalRepository;
 import com.codewithgaurav.store.repository.UserRepository;
 
@@ -35,6 +36,9 @@ public class FutsalService {
 
     @Autowired
     FutsalRepository futsalRepo;
+
+    @Autowired
+    private FutsalMapper futsalMapper;
 
     // IS Requested user is Owner
     public boolean isOwner(Long id) {
@@ -129,20 +133,18 @@ public class FutsalService {
     }
 
     // update futsal data (JSON) to database
-    public boolean updateFutsalDetailsByFutsalId(FutsalEntity futsal, Long futsalId) {
-        System.out.println(futsal.toString());
+    public FutsalEntity updateFutsalById(FutsalEntity futsal, Long futsalId) {
         FutsalEntity existingFutsal = futsalRepo.findById(futsalId).get();
         existingFutsal.setName(futsal.getName());
         existingFutsal.setDistrict(futsal.getDistrict());
         existingFutsal.setCity(futsal.getCity());
         existingFutsal.setLatitude(futsal.getLatitude());
         existingFutsal.setLongitude(futsal.getLongitude());
-
         if (futsal.getCoverImage() != null && !futsal.getCoverImage().isEmpty()) {
             existingFutsal.setCoverImage(futsal.getCoverImage());
         }
         FutsalEntity saved = futsalRepo.save(existingFutsal);
-        return saved != null && saved.getId() != null;
+        return saved;
     }
 
     // check the futsal with registration number exists
@@ -159,22 +161,7 @@ public class FutsalService {
     public Page<FutsalResponseDTO> getFilterFutsal(String search, Pageable pageable) {
         Page<FutsalEntity> futsalPage;
         futsalPage = futsalRepo.findByNameContainingIgnoreCase(search, pageable);
-        return futsalPage.map(futsal -> {
-            FutsalResponseDTO dto = new FutsalResponseDTO();
-            dto.setId(futsal.getId());
-            dto.setName(futsal.getName());
-            dto.setCity(futsal.getCity());
-            dto.setDistrict(futsal.getDistrict());
-            dto.setRegistrationNumber(futsal.getRegistrationNumber());
-            dto.setCoverImage(baseUrl + futsal.getCoverImage());
-            dto.setRegistrationPhoto(baseUrl + futsal.getRegistrationPhoto());
-            if (futsal.getImages() != null) {
-                List<String> images = futsal.getImages().stream().map(img -> baseUrl + img.getImageUrl()).toList();
-                dto.setImageUrls(images);
-            }
-            return dto;
-        });
-
+        return futsalPage.map(this::convertToFutsalDto);
     }
 
     // owner Futsals
@@ -192,7 +179,7 @@ public class FutsalService {
             dto.setRegistrationPhoto(baseUrl + futsal.getRegistrationPhoto());
             if (futsal.getImages() != null) {
                 List<String> images = futsal.getImages().stream().map(img -> baseUrl + img.getImageUrl()).toList();
-                dto.setImageUrls(images);
+                dto.setImages(images);
             }
             return dto;
         });
@@ -214,7 +201,7 @@ public class FutsalService {
         futsalResponseDTO.setRegistrationNumber(futsal.getRegistrationNumber());
         futsalResponseDTO.setCoverImage(baseUrl + futsal.getCoverImage());
         futsalResponseDTO.setRegistrationPhoto(baseUrl + futsal.getRegistrationPhoto());
-        futsalResponseDTO.setImageUrls(imageUrls);
+        futsalResponseDTO.setImages(imageUrls);
         return futsalResponseDTO;
     }
 
@@ -250,6 +237,16 @@ public class FutsalService {
             return true;
         } else
             return false;
+    }
+
+    public FutsalResponseDTO convertToFutsalDto(FutsalEntity futsal) {
+        return futsalMapper.toDto(futsal);
+    }
+
+    // Get the futsal based on longitude and latitude
+    public List<FutsalResponseDTO> getNearByFutsals(Double latitude, Double longitude, int radius) {
+        List<FutsalEntity> futsals = futsalRepo.findFutsalsWithinRadius(latitude, longitude, radius);
+        return futsals.stream().map(this::convertToFutsalDto).toList();
     }
 
 }
