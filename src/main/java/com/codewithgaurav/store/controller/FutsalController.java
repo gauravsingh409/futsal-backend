@@ -8,7 +8,6 @@ import com.codewithgaurav.store.payload.PaginatedResponse;
 import com.codewithgaurav.store.services.FutsalService;
 import com.codewithgaurav.store.services.JwtService;
 import com.codewithgaurav.store.validation.FutsalValidation;
-
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,10 +24,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,35 +47,25 @@ public class FutsalController {
             @RequestPart(value = "images", required = false) MultipartFile[] images,
             @RequestPart("cover_image") MultipartFile coverImage,
             HttpServletRequest httpRequest) {
-        String authHeader = httpRequest.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer")) {
-            ApiResponse<Map<String, Object>> response = new ApiResponse<>("user not authenticated", 401, false);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractId(token);
-        boolean isOwner = futsalService.isOwner(id);
+        Long id = jwtService.extractValidOwnerId(httpRequest);
 
-        if (isOwner) {
+        if (id != null) {
             // Check the futsal with this registration number is registered or not
             boolean isFutsalAlreadyRegistered = futsalService
                     .isFutsalAlreadyRegistered(request.getRegistrationNumber());
             if (isFutsalAlreadyRegistered)
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(new ApiResponse<>("Futsal Already Registered", 409, false));
-
             // Store the Registration Photo
             boolean isRegistrationPhotoStored = futsalService.storeRegistrationPhoto(registraionPhoto, request);
             if (!isRegistrationPhotoStored)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new ApiResponse<>("Some error occurred while saving the registration photo", 400, false));
-
             // Store Cover Images
             boolean isCoverImageStored = futsalService.storeCoverImage(coverImage, request);
-            if (!isCoverImageStored) {
+            if (!isCoverImageStored)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new ApiResponse<>("Some error occurred while saving the cover image", 400, false));
-            }
 
             // Store the Multiple Images
             boolean isImagesStored = futsalService.storeMultipleImages(images, request);
@@ -91,7 +78,6 @@ public class FutsalController {
             if (!isDataStored)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new ApiResponse<>("some Error occured while saving the data", 400, false));
-
             FutsalResponseDTO dto = new FutsalResponseDTO();
             dto.setId(request.getId());
             dto.setName(request.getName());
@@ -102,20 +88,17 @@ public class FutsalController {
             dto.setCoverImage(request.getCoverImage());
             dto.setLatitude(request.getLatitude());
             dto.setLongitude(request.getLongitude());
-
             List<String> imageUrls = request.getImages().stream()
                     .map(FutsalImages::getImageUrl)
                     .toList();
-
             dto.setImages(imageUrls);
 
             // Data successfully store to databse
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new ApiResponse<>("Futsal Registered successfully", 200, true, dto));
-        } else {
+        } else
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ApiResponse<>("You don't have permission to perform this action", 403, false));
-        }
     }
 
     // get the futsal
@@ -279,6 +262,8 @@ public class FutsalController {
     public ResponseEntity<?> deleteFutsalById(
             @PathVariable("id") Long futsalId,
             HttpServletRequest httpServletRequest) {
+        jwtService.extractValidOwnerId(httpServletRequest);
+
         String authHeader = httpServletRequest.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer")) {
             ApiResponse<Map<String, Object>> response = new ApiResponse<>("user not authenticated", 401, false);
