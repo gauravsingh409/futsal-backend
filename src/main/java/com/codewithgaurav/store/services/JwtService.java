@@ -127,4 +127,10 @@ public class JwtService {
         return id > 0 ? id : null;
     }
 
+    public Long extractValidOwnerId(HttpServletRequest httpServletRequest) {
+        String token = this.extractToken(httpServletRequest);
+        Long id = this.extractId(token);
+        return this.isAdmin(id) ? id : null;
+    }
+
 }

@@ -4,8 +4,6 @@ import java.io.File;
 
 import com.codewithgaurav.store.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.codewithgaurav.store.dto.request.UserRequestDto;
@@ -93,16 +91,6 @@ public class UserService {
 
         // save
         return userRepository.save(existingOwner);
-    }
-
-    public Page<UserEntity> getAllUser(Pageable pageable, String search, String role) {
-        String safeSearch = (search == null) ? "" : search;
-        String safeRole = (role == null) ? "" : role;
-        // return
-        // userRepo.findByRoleContainingIgnoreCaseAndNameContainingIgnoreCase(safeRole,
-        // safeSearch, pageable);
-
-        throw new UnsupportedOperationException("Unimplemented method 'getAllUser'");
     }
 
 }
