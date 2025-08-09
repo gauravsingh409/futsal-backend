@@ -22,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -207,19 +208,10 @@ public class UserAuthController {
             @RequestParam(defaultValue = "10") int page_size,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) @ValidRole(allowed = { "user",
-                    "admin" }, message = "Only admin or owner roles are allowed") String role) {
-        String token = jwtService.extractToken(httpServletRequest);
-        if (token == null || token.isEmpty())
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new ApiResponse<>("Authentical Creadential not provided", 401, false));
-        Long userId = jwtService.extractId(token);
-        Boolean isAdmin = jwtService.isAdmin(userId);
-        if (!isAdmin)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new ApiResponse<>("Permission not allowed", 401, false));
+                    "admin" }, message = "Only admin or user roles are allowed") String role) {
+        jwtService.extractValidAdminId(httpServletRequest);
         Pageable pageable = PageRequest.of(page, page_size);
         Page<UserEntity> users = userRepository.findAll(pageable);
-
         return ResponseEntity.ok().body(new ApiResponse<>("User retrieved successfully", 200, true,
                 new PaginatedResponse<>(users.getContent(), users.getNumber(), users.getSize(),
                         users.getTotalElements(), users.getTotalPages())));
@@ -332,6 +324,15 @@ public class UserAuthController {
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .body(new ApiResponse<>("User details retrieved successfully", 200, true,
                         userService.findDetailsById(userId)));
+    }
+
+    @DeleteMapping(value = "/user/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable("id") Long userId, HttpServletRequest httpServletRequest) {
+        jwtService.extractValidAdminId(httpServletRequest);
+        if (userService.deleteUser(userId))
+            return ResponseEntity.ok().body(new ApiResponse<>("User deleted successfully", 200, true));
+        else
+            return ResponseEntity.ok().body(new ApiResponse<>("User with id " + userId + " not found", 400, false));
     }
 
 }

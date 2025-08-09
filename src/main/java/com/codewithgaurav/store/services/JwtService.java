@@ -130,7 +130,10 @@ public class JwtService {
     public Long extractValidAdminId(HttpServletRequest httpServletRequest) {
         String token = this.extractToken(httpServletRequest);
         Long id = this.extractId(token);
-        return this.isAdmin(id) ? id : null;
+        if (this.isAdmin(id))
+            return id;
+        else
+            throw new UnauthorizedException("Permission not allowed");
     }
 
     // is valid owner or admin
@@ -141,4 +144,5 @@ public class JwtService {
         System.out.println("Owner Id" + ownerId + "\n Admin id " + adminId);
         return ownerId > 0 && adminId > 0;
     }
+
 }

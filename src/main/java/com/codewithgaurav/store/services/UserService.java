@@ -90,8 +90,17 @@ public class UserService {
         return userRepository.save(existingOwner);
     }
 
+    // Convert UserEntity to UserDot
     public UserDto convertToUserDto(UserEntity user) {
         return userMapper.toDto(user);
     }
 
+    // delete the user
+    public boolean deleteUser(Long userId) {
+        if (userRepository.existsById(userId)) {
+            userRepository.deleteById(userId);
+            return true;
+        }
+        return false;
+    }
 }
