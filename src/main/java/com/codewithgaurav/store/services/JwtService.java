@@ -2,9 +2,9 @@ package com.codewithgaurav.store.services;
 
 import java.security.Key;
 import java.util.Date;
-
 import io.jsonwebtoken.JwtException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.codewithgaurav.store.entity.UserEntity;
 import com.codewithgaurav.store.exception.UnauthorizedException;
@@ -31,22 +31,6 @@ public class JwtService {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
-    // public String generateToken(String username, String id) {
-    // return Jwts.builder() // Start building jwt using jwt.builder()
-    // .setSubject(username) // sets the subject or data of the token - It is
-    // default claim(data) that it
-    // // accept
-    // .claim("id", id) // if we need to store other field too then we can manually
-    // add our claim (data)
-    // .setIssuedAt(new Date()) // currently issue time
-    // .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 *
-    // 7)) // 1 hour after the token
-    // // creaed
-    // .signWith(getKey(), SignatureAlgorithm.HS256) // algorithm with secreatkey
-    // .compact(); // convert the token to compact, URL safe string - ready to send
-    // to frontend
-    // }
-
     public String extractUsername(String token) {
         return Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).getBody().getSubject();
     }
@@ -63,6 +47,12 @@ public class JwtService {
         } catch (JwtException | IllegalArgumentException e) {
             throw new UnauthorizedException("Invalid or expired jwt token");
         }
+    }
+
+    // is valid user
+    public boolean isValidUser(HttpServletRequest httpServletRequest) {
+        String token = this.extractToken(httpServletRequest);
+        return StringUtils.hasText(token) ? true : false;
     }
 
     // accept the token and extract the id from token
@@ -89,8 +79,8 @@ public class JwtService {
     // extract token
     public String extractToken(HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer"))
-            return "";
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
+            throw new UnauthorizedException("Token not provided.");
         String token = authHeader.substring(7);
         return token;
     }
@@ -127,10 +117,28 @@ public class JwtService {
         return id > 0 ? id : null;
     }
 
+    // Extract owner id
     public Long extractValidOwnerId(HttpServletRequest httpServletRequest) {
+        String token = this.extractToken(httpServletRequest);
+        Long id = this.extractId(token);
+        if (this.isAdmin(id))
+            return id;
+        else
+            throw new UnauthorizedException("Permission not allowed");
+    }
+
+    public Long extractValidAdminId(HttpServletRequest httpServletRequest) {
         String token = this.extractToken(httpServletRequest);
         Long id = this.extractId(token);
         return this.isAdmin(id) ? id : null;
     }
 
+    // is valid owner or admin
+    public boolean isValidAdminOrOwner(HttpServletRequest httpServletRequest) {
+        Long ownerId = this.extractValidOwnerId(httpServletRequest);
+        Long adminId = this.extractValidAdminId(httpServletRequest);
+        // System.out.println("Owner Id %d \n Admin id %d", ownerId, adminId);
+        System.out.println("Owner Id" + ownerId + "\n Admin id " + adminId);
+        return ownerId > 0 && adminId > 0;
+    }
 }

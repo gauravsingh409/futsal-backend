@@ -12,7 +12,7 @@ public class FutsalDetailsDto {
    private List<String> images;
    private String converImage;
    private String registrationPhoto;
-   private OwnerDto owner;
+   private UserDto user;
    private Date createdAt;
    private Date updatedAt;
 
@@ -80,12 +80,12 @@ public class FutsalDetailsDto {
       this.registrationPhoto = registrationPhoto;
    }
 
-   public OwnerDto getOwner() {
-      return owner;
+   public UserDto getUser() {
+      return user;
    }
 
-   public void setOwner(OwnerDto owner) {
-      this.owner = owner;
+   public void setUser(UserDto user) {
+      this.user = user;
    }
 
    public Date getCreatedAt() {
@@ -108,7 +108,7 @@ public class FutsalDetailsDto {
    public String toString() {
       return "FutsalDetailsDto [id=" + id + ", name=" + name + ", registrationNumber=" + registrationNumber
             + ", district=" + district + ", city=" + city + ", images=" + images
-            + ", converImage=" + converImage + ", registrationPhoto=" + registrationPhoto + ", owner=" + owner
+            + ", converImage=" + converImage + ", registrationPhoto=" + registrationPhoto + ", user=" + user
             + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
    }
 
