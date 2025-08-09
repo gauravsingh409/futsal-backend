@@ -1,13 +1,10 @@
 package com.codewithgaurav.store.services;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.codewithgaurav.store.entity.TimeSlotEntity;
 import com.codewithgaurav.store.exception.ResourceNotFoundException;
 import com.codewithgaurav.store.repository.FutsalRepository;
@@ -40,8 +37,8 @@ public class TimeSlotService {
    }
 
    // Is Futsal TimeSlot exist
-   public boolean isTimeSlotExist(Long futsalId, LocalDate date, LocalTime startTime) {
-      return timeSlotRepo.existsByFutsalIdAndDateAndStartTime(futsalId, date, startTime);
+   public boolean isTimeSlotExist(Long futsalId, LocalTime startTime) {
+      return timeSlotRepo.existsByFutsalIdAndStartTime(futsalId, startTime);
    }
 
    // get details by id
@@ -56,12 +53,20 @@ public class TimeSlotService {
       if (existingOptional.isEmpty())
          throw new ResourceNotFoundException("Time Slot with Id " + timeSlotId + "not found");
       // Update the data
-      existingOptional.get().setDate(request.getDate());
       existingOptional.get().setStartTime(request.getStartTime());
       existingOptional.get().setEndTime(request.getEndTime());
       existingOptional.get().setPrice(request.getPrice());
       timeSlotRepo.save(existingOptional.get());
       return existingOptional.get();
+   }
+
+   // Delete Time Slot
+   public boolean deleteTimeSlot(Long timeSlotId) {
+      if (timeSlotRepo.existsById(timeSlotId)) {
+         timeSlotRepo.deleteById(timeSlotId);
+         return true;
+      }
+      return false;
    }
 
 }
