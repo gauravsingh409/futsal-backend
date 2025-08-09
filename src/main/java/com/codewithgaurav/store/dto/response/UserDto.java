@@ -13,6 +13,7 @@ public class UserDto {
    private String profileImageUrl;
    private boolean isUser = false;
    private boolean isOwner = true;
+   private boolean isAdmin = false;
 
    // Getter & Setter
    public String getId() {
@@ -93,5 +94,13 @@ public class UserDto {
 
    public void setUser(boolean isUser) {
       this.isUser = isUser;
+   }
+
+   public void setAdmin(boolean isAdmin) {
+      this.isAdmin = isAdmin;
+   }
+
+   public boolean isAdmin() {
+      return isAdmin;
    }
 }
