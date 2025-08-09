@@ -1,6 +1,5 @@
 package com.codewithgaurav.store.repository;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -11,5 +10,5 @@ import com.codewithgaurav.store.entity.TimeSlotEntity;
 public interface TimeSlotRepository extends JpaRepository<TimeSlotEntity, Long> {
    List<TimeSlotEntity> findByFutsalId(Long futsalId);
 
-   boolean existsByFutsalIdAndDateAndStartTime(Long FutsalId, LocalDate date, LocalTime starTime);
+   boolean existsByFutsalIdAndStartTime(Long FutsalId, LocalTime starTime);
 }

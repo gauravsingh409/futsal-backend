@@ -1,11 +1,10 @@
 package com.codewithgaurav.store.controller;
 
 import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.codewithgaurav.store.entity.TimeSlotEntity;
 import com.codewithgaurav.store.payload.ApiResponse;
 import com.codewithgaurav.store.security.AuthResult;
@@ -40,24 +38,9 @@ public class TimeSlotController {
    public ResponseEntity<?> createSlot(
          @RequestBody TimeSlotEntity timeslot,
          HttpServletRequest httpRequest) {
-      String authHeader = httpRequest.getHeader("Authorization");
-      if (authHeader == null || !authHeader.startsWith("Bearer")) {
-         ApiResponse<Map<String, Object>> response = new ApiResponse<>("user not authenticated", 401, false);
-         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-      }
-      String token = authHeader.substring(7);
-      Long id = jwtService.extractId(token);
-      boolean isOwner = futsalService.isOwner(id);
-
-      // if not owner return false
-      if (!isOwner) {
-         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-               .body(new ApiResponse<>("Permission not allowed", 401, false));
-      }
+      jwtService.isValidAdminOrOwner(httpRequest);
       // check the time slot exist on daabase or not
-      boolean isTimeSlotExist = timeSlotService.isTimeSlotExist(timeslot.getFutsalId(), timeslot.getDate(),
-            timeslot.getStartTime());
-
+      boolean isTimeSlotExist = timeSlotService.isTimeSlotExist(timeslot.getFutsalId(), timeslot.getStartTime());
       if (isTimeSlotExist)
          return ResponseEntity.badRequest().body(new ApiResponse<>("Time slot already exists", 400, false));
 
@@ -96,6 +79,14 @@ public class TimeSlotController {
       TimeSlotEntity data = timeSlotService.putUpdate(request, timeSlotId);
 
       return ResponseEntity.ok().body(new ApiResponse<>("Time slot updated successfully", 200, true, data));
+   }
+
+   @DeleteMapping(value = "/delete/{id}")
+   public ResponseEntity<?> deleteTimeSlot(@PathVariable("id") Long timeSlotId, HttpServletRequest httpServletRequest) {
+      jwtService.isValidAdminOrOwner(httpServletRequest);
+      if (timeSlotService.deleteTimeSlot(timeSlotId))
+         return ResponseEntity.ok().body(new ApiResponse<>("Time slot deleted Successfully", 200, true));
+      return ResponseEntity.ok().body(new ApiResponse<>("Time slot with id " + timeSlotId + " not found", 400, false));
    }
 
 }

@@ -1,7 +1,6 @@
 package com.codewithgaurav.store.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
@@ -13,9 +12,7 @@ public class TimeSlotEntity {
    private Long id;
 
    @Column(name = "futsal_id", nullable = false)
-   private Long futsalId; // Foreign key reference (can be linked later)
-
-   private LocalDate date;
+   private Long futsalId;
    private LocalTime startTime;
    private LocalTime endTime;
    private Double price;
@@ -39,14 +36,6 @@ public class TimeSlotEntity {
 
    public void setFutsalId(Long futsalId) {
       this.futsalId = futsalId;
-   }
-
-   public LocalDate getDate() {
-      return date;
-   }
-
-   public void setDate(LocalDate date) {
-      this.date = date;
    }
 
    public LocalTime getStartTime() {
