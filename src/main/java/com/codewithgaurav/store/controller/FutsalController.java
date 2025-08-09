@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
-import java.util.Map;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -140,17 +139,9 @@ public class FutsalController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String search,
             HttpServletRequest httpServletRequest) {
+        Long id = jwtService.extractValidOwnerId(httpServletRequest);
 
-        String authHeader = httpServletRequest.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer")) {
-            ApiResponse<Map<String, Object>> response = new ApiResponse<>("user not authenticated", 401, false);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractId(token);
-        boolean isOwner = futsalService.isOwner(id);
-
-        if (!isOwner)
+        if (id != null)
             return ResponseEntity.badRequest().body(new ApiResponse<>("You don't have permission", 400, false, null));
 
         // Validate the page and pageSize
@@ -183,15 +174,9 @@ public class FutsalController {
     public ResponseEntity<?> getFutsalById(
             @PathVariable("id") Long futsalId,
             HttpServletRequest httpServletRequest) {
-        String authHeader = httpServletRequest.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer")) {
-            ApiResponse<Map<String, Object>> response = new ApiResponse<>("user not authenticated", 401, false);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractId(token);
+        boolean isValidUser = jwtService.isValidUser(httpServletRequest);
 
-        if (id != null && !id.toString().trim().isEmpty()) {
+        if (isValidUser) {
             FutsalResponseDTO futsal = futsalService.getFutsalDetails(futsalId);
             return ResponseEntity.ok().body(new ApiResponse<>("Futsal details retrieved", 200, true, futsal));
         } else {
@@ -209,15 +194,8 @@ public class FutsalController {
             @RequestPart(value = "cover_image", required = false) MultipartFile coverImage,
             @PathVariable("id") Long futsalId,
             HttpServletRequest httpServletRequest) {
-        String authHeader = httpServletRequest.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer")) {
-            ApiResponse<Map<String, Object>> response = new ApiResponse<>("user not authenticated", 401, false);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractId(token);
-        boolean isOwner = futsalService.isOwner(id);
-        if (isOwner) {
+        long ownerId = jwtService.extractValidOwnerId(httpServletRequest);
+        if (ownerId > 0) {
             // Delete Images if user has uploaded new images
             if (images != null && images.length > 0) {
                 futsalService.deleteFutsalImagesByFutsalId(futsalId);
@@ -263,20 +241,7 @@ public class FutsalController {
             @PathVariable("id") Long futsalId,
             HttpServletRequest httpServletRequest) {
         jwtService.extractValidOwnerId(httpServletRequest);
-
-        String authHeader = httpServletRequest.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer")) {
-            ApiResponse<Map<String, Object>> response = new ApiResponse<>("user not authenticated", 401, false);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractId(token);
-        boolean isOwner = futsalService.isOwner(id);
-
-        if (!isOwner)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ApiResponse<>("Permission Not Allowed", 401, false));
-        Boolean isDeleted = futsalService.deleteFutsalById(futsalId);
+        boolean isDeleted = futsalService.deleteFutsalById(futsalId);
         if (!isDeleted)
             return ResponseEntity.badRequest()
                     .body(new ApiResponse<>(String.format("futsal %s not found", futsalId), 400, false));

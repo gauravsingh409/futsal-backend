@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.codewithgaurav.store.dto.request.UserRequestDto;
+import com.codewithgaurav.store.dto.response.UserDto;
 import com.codewithgaurav.store.entity.UserEntity;
 import com.codewithgaurav.store.exception.ResourceNotFoundException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.codewithgaurav.store.mapper.UserMapper;
 
 @Service
 public class UserService {
@@ -19,15 +19,12 @@ public class UserService {
     UserRepository userRepository;
 
     @Autowired
-    ObjectMapper objectMapper;
+    UserMapper userMapper;
 
-    public String findDetailsById(Long id) throws JsonProcessingException {
+    public UserDto findDetailsById(Long id) {
         UserEntity owner = userRepository.findById(id)
-                // .get();
-                .orElseThrow(() -> new ResourceNotFoundException("owner", "id", id));
-        // System.out.println(owner); // it will give the java object memory reference
-        // ObjectMapper translate the java object to the json and json to java object.
-        return objectMapper.writeValueAsString(owner);
+                .orElseThrow(() -> new ResourceNotFoundException("user", "id", id));
+        return this.convertToUserDto(owner);
     }
 
     public UserEntity updateUserProfile(Long id, UserEntity request) throws RuntimeException {
@@ -91,6 +88,10 @@ public class UserService {
 
         // save
         return userRepository.save(existingOwner);
+    }
+
+    public UserDto convertToUserDto(UserEntity user) {
+        return userMapper.toDto(user);
     }
 
 }
