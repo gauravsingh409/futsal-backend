@@ -76,6 +76,12 @@ public class JwtService {
         return user.isAdmin();
     }
 
+    // is logged user is owner
+    public boolean isOwner(Long userId) {
+        UserEntity user = userRepository.findById(userId).get();
+        return user.isOwner();
+    }
+
     // extract token
     public String extractToken(HttpServletRequest httpServletRequest) {
         String authHeader = httpServletRequest.getHeader("Authorization");
@@ -121,7 +127,7 @@ public class JwtService {
     public Long extractValidOwnerId(HttpServletRequest httpServletRequest) {
         String token = this.extractToken(httpServletRequest);
         Long id = this.extractId(token);
-        if (this.isAdmin(id))
+        if (this.isOwner(id))
             return id;
         else
             throw new UnauthorizedException("Permission not allowed");

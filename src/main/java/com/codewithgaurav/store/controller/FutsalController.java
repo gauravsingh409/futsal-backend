@@ -119,7 +119,6 @@ public class FutsalController {
 
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<FutsalResponseDTO> futsalPage = futsalService.getFilterFutsal(search, pageable);
-        System.out.println(futsalPage.toString());
 
         // Java will automatically infer the type of response
         var response = new PaginatedResponse<>(
@@ -137,13 +136,9 @@ public class FutsalController {
     public ResponseEntity<?> getOwnerFutsals(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String search,
+            @RequestParam(required = false, defaultValue = "") String search,
             HttpServletRequest httpServletRequest) {
         Long id = jwtService.extractValidOwnerId(httpServletRequest);
-
-        if (id != null)
-            return ResponseEntity.badRequest().body(new ApiResponse<>("You don't have permission", 400, false, null));
-
         // Validate the page and pageSize
         if (page < 0 || pageSize <= 0) {
             return ResponseEntity.badRequest()

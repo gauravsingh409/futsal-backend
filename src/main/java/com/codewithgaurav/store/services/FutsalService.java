@@ -161,7 +161,7 @@ public class FutsalService {
     public Page<FutsalResponseDTO> getFilterFutsal(String search, Pageable pageable) {
         Page<FutsalEntity> futsalPage;
         futsalPage = futsalRepo.findByNameContainingIgnoreCase(search, pageable);
-        return futsalPage.map(this::convertToFutsalDto);
+        return futsalPage.map(futsalMapper::toDto);
     }
 
     // owner Futsals
