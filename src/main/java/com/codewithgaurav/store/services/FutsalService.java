@@ -168,21 +168,7 @@ public class FutsalService {
     public Page<FutsalResponseDTO> getOwnerFutsals(Long id, String search, Pageable pageable) {
         Page<FutsalEntity> futsalPage;
         futsalPage = futsalRepo.findByUser_IdAndNameContainingIgnoreCase(id, search, pageable);
-        return futsalPage.map(futsal -> {
-            FutsalResponseDTO dto = new FutsalResponseDTO();
-            dto.setId(futsal.getId());
-            dto.setName(futsal.getName());
-            dto.setCity(futsal.getCity());
-            dto.setDistrict(futsal.getDistrict());
-            dto.setRegistrationNumber(futsal.getRegistrationNumber());
-            dto.setCoverImage(baseUrl + futsal.getCoverImage());
-            dto.setRegistrationPhoto(baseUrl + futsal.getRegistrationPhoto());
-            if (futsal.getImages() != null) {
-                List<String> images = futsal.getImages().stream().map(img -> baseUrl + img.getImageUrl()).toList();
-                dto.setImages(images);
-            }
-            return dto;
-        });
+        return futsalPage.map(futsalMapper::toDto);
 
     }
 
@@ -190,19 +176,7 @@ public class FutsalService {
     public FutsalResponseDTO getFutsalDetails(Long id) {
         FutsalEntity futsal = futsalRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Futsal not found with ID: " + id));
-        List<String> imageUrls = futsal.getImages().stream().map(img -> baseUrl + img.getImageUrl()).toList();
-        FutsalResponseDTO futsalResponseDTO = new FutsalResponseDTO();
-        futsalResponseDTO.setId(futsal.getId());
-        futsalResponseDTO.setName(futsal.getName());
-        futsalResponseDTO.setCity(futsal.getCity());
-        futsalResponseDTO.setDistrict(futsal.getDistrict());
-        futsalResponseDTO.setLatitude(futsal.getLatitude());
-        futsalResponseDTO.setLongitude(futsal.getLongitude());
-        futsalResponseDTO.setRegistrationNumber(futsal.getRegistrationNumber());
-        futsalResponseDTO.setCoverImage(baseUrl + futsal.getCoverImage());
-        futsalResponseDTO.setRegistrationPhoto(baseUrl + futsal.getRegistrationPhoto());
-        futsalResponseDTO.setImages(imageUrls);
-        return futsalResponseDTO;
+        return futsalMapper.toDto(futsal);
     }
 
     // delete futsal images by futsal id
