@@ -1,5 +1,6 @@
 package com.codewithgaurav.store.exception;
 
+import java.security.SignatureException;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.codewithgaurav.store.exception.customException.NotAuthenticatedException;
 import com.codewithgaurav.store.payload.ApiResponse;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.validation.ConstraintViolationException;
 
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -72,6 +75,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotAuthenticatedException.class)
     public ResponseEntity<ApiResponse<?>> handleNotAuthenticatedException(NotAuthenticatedException ex) {
+        return ResponseEntity.status(HttpStatusCode.valueOf(401)).body(new ApiResponse<>(ex.getMessage(), 401, false));
+    }
+
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<?> handleSignatureException(SignatureException ex) {
+        return ResponseEntity.status(HttpStatusCode.valueOf(401)).body(new ApiResponse<>(ex.getMessage(), 401, false));
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<?> handleExpiredJwtException(ExpiredJwtException ex) {
+        return ResponseEntity.status(HttpStatusCode.valueOf(401)).body(new ApiResponse<>(ex.getMessage(), 401, false));
+    }
+
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity<?> handleMalformedJwtException(MalformedJwtException ex) {
         return ResponseEntity.status(HttpStatusCode.valueOf(401)).body(new ApiResponse<>(ex.getMessage(), 401, false));
     }
 

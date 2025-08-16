@@ -45,16 +45,13 @@ public class FutsalController {
             @RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalEntity request,
             @RequestPart(value = "images", required = false) MultipartFile[] images,
             @RequestPart("cover_image") MultipartFile coverImage,
-            HttpServletRequest httpRequest) {
-        Long id = jwtService.extractValidOwnerId(httpRequest);
-
+            HttpServletRequest httpServletRequest) {
+        jwtService.isValidAdminOrOwner(httpServletRequest);
+        Long id = jwtService.extractId(httpServletRequest);
         if (id != null) {
             // Check the futsal with this registration number is registered or not
-            boolean isFutsalAlreadyRegistered = futsalService
-                    .isFutsalAlreadyRegistered(request.getRegistrationNumber());
-            if (isFutsalAlreadyRegistered)
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(new ApiResponse<>("Futsal Already Registered", 409, false));
+            futsalService.isFutsalAlreadyRegistered(request.getRegistrationNumber());
+
             // Store the Registration Photo
             boolean isRegistrationPhotoStored = futsalService.storeRegistrationPhoto(registraionPhoto, request);
             if (!isRegistrationPhotoStored)

@@ -37,7 +37,9 @@ public class TimeSlotService {
    }
 
    // Is Futsal TimeSlot exist
-   public boolean isTimeSlotExist(Long futsalId, LocalTime startTime) {
+   public boolean isTimeSlotExist(Long futsalId, LocalTime startTime, LocalTime endTime) {
+      System.out.println("startTime " + startTime);
+      System.out.println("endTime " + endTime);
       return timeSlotRepo.existsByFutsalIdAndStartTime(futsalId, startTime);
    }
 

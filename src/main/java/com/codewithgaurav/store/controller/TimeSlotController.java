@@ -2,7 +2,6 @@ package com.codewithgaurav.store.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.codewithgaurav.store.entity.TimeSlotEntity;
 import com.codewithgaurav.store.payload.ApiResponse;
-import com.codewithgaurav.store.security.AuthResult;
 import com.codewithgaurav.store.services.FutsalService;
 import com.codewithgaurav.store.services.JwtService;
 import com.codewithgaurav.store.services.TimeSlotService;
@@ -40,7 +38,8 @@ public class TimeSlotController {
          HttpServletRequest httpRequest) {
       jwtService.isValidAdminOrOwner(httpRequest);
       // check the time slot exist on daabase or not
-      boolean isTimeSlotExist = timeSlotService.isTimeSlotExist(timeslot.getFutsalId(), timeslot.getStartTime());
+      boolean isTimeSlotExist = timeSlotService.isTimeSlotExist(timeslot.getFutsalId(), timeslot.getStartTime(),
+            timeslot.getEndTime());
       if (isTimeSlotExist)
          return ResponseEntity.badRequest().body(new ApiResponse<>("Time slot already exists", 400, false));
 
@@ -68,13 +67,7 @@ public class TimeSlotController {
    public ResponseEntity<?> updateTimeSlot(@PathVariable Long timeSlotId,
          HttpServletRequest httpServletRequest,
          @RequestBody TimeSlotEntity request) {
-      String authHeader = httpServletRequest.getHeader("Authorization");
-      AuthResult result = jwtService.extractUserId(authHeader);
-      if (!result.isValid())
-         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-               new ApiResponse<>(result.getErrorMessage(), 401, false));
-
-      // Update into database
+      Long id = jwtService.extractId(httpServletRequest);
 
       TimeSlotEntity data = timeSlotService.putUpdate(request, timeSlotId);
 

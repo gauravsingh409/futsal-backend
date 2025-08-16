@@ -149,7 +149,10 @@ public class FutsalService {
 
     // check the futsal with registration number exists
     public boolean isFutsalAlreadyRegistered(String registrationNumber) {
-        return futsalRepo.existsByRegistrationNumber(registrationNumber);
+        if (futsalRepo.existsByRegistrationNumber(registrationNumber))
+            throw new RuntimeException("Futsal already registered");
+        else
+            return false;
     }
 
     // Get All Futsal
