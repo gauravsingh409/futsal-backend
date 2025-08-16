@@ -22,7 +22,7 @@ public class WebConfig implements WebMvcConfigurer {
     */
    @Override
    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
-      String uploadDir = System.getProperty("user.dir") + "/uploads/";
+      String uploadDir = System.getProperty("user.dir") + "/upload";
       /*
        * addResourceHandler ->
        * Defines the URL pattern that Spring will treat as requests for static
@@ -30,7 +30,7 @@ public class WebConfig implements WebMvcConfigurer {
        * It tells Spring to serve every file requested under "/uploads/**" as a static
        * file.
        */
-      registry.addResourceHandler("/uploads/**")
+      registry.addResourceHandler("/upload/**")
             /*
              * addResourceLocations ->
              * Specifies the actual physical location of the static files on the server.
@@ -51,6 +51,5 @@ public class WebConfig implements WebMvcConfigurer {
              */
             .setCachePeriod(3600);
    }
-   
-   
+
 }

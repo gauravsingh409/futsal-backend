@@ -8,9 +8,7 @@ import org.springframework.util.StringUtils;
 
 import com.codewithgaurav.store.entity.UserEntity;
 import com.codewithgaurav.store.exception.UnauthorizedException;
-import com.codewithgaurav.store.exception.customException.NotAuthenticatedException;
 import com.codewithgaurav.store.repository.UserRepository;
-import com.codewithgaurav.store.security.AuthResult;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -31,12 +29,18 @@ public class JwtService {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
-    public String extractUsername(String token) {
+    public String extractUsernameFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).getBody().getSubject();
     }
 
-    // Extract the id from token
-    public Long extractId(String token) {
+    public Long extractIdFromToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token).getBody().get("id",
+                Long.class);
+    }
+
+    // Extract the id from httpServeletRequest
+    public Long extractId(HttpServletRequest httpServletRequest) {
+        String token = this.extractToken(httpServletRequest);
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(getKey())
@@ -53,21 +57,6 @@ public class JwtService {
     public boolean isValidUser(HttpServletRequest httpServletRequest) {
         String token = this.extractToken(httpServletRequest);
         return StringUtils.hasText(token) ? true : false;
-    }
-
-    // accept the token and extract the id from token
-    public AuthResult extractUserId(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer")) {
-            return new AuthResult(false, null, "Authorization not provided");
-        }
-
-        String token = authHeader.substring(7);
-        try {
-            Long userId = this.extractId(token);
-            return new AuthResult(true, userId, null);
-        } catch (Exception e) {
-            return new AuthResult(false, null, token + " is not a valid authorization token");
-        }
     }
 
     // is logged user is admin
@@ -115,18 +104,13 @@ public class JwtService {
 
     // is valid user
     public Long extractValidUserId(HttpServletRequest httpServletRequest) {
-        String authHeader = httpServletRequest.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer "))
-            throw new NotAuthenticatedException("Token not provided");
-        String token = authHeader.substring(7);
-        Long id = this.extractId(token);
+        Long id = this.extractId(httpServletRequest);
         return id > 0 ? id : null;
     }
 
     // Extract owner id
     public Long extractValidOwnerId(HttpServletRequest httpServletRequest) {
-        String token = this.extractToken(httpServletRequest);
-        Long id = this.extractId(token);
+        Long id = this.extractId(httpServletRequest);
         if (this.isOwner(id))
             return id;
         else
@@ -134,8 +118,7 @@ public class JwtService {
     }
 
     public Long extractValidAdminId(HttpServletRequest httpServletRequest) {
-        String token = this.extractToken(httpServletRequest);
-        Long id = this.extractId(token);
+        Long id = this.extractId(httpServletRequest);
         if (this.isAdmin(id))
             return id;
         else
@@ -144,11 +127,11 @@ public class JwtService {
 
     // is valid owner or admin
     public boolean isValidAdminOrOwner(HttpServletRequest httpServletRequest) {
-        Long ownerId = this.extractValidOwnerId(httpServletRequest);
-        Long adminId = this.extractValidAdminId(httpServletRequest);
-        // System.out.println("Owner Id %d \n Admin id %d", ownerId, adminId);
-        System.out.println("Owner Id" + ownerId + "\n Admin id " + adminId);
-        return ownerId > 0 && adminId > 0;
+        Long id = this.extractId(httpServletRequest);
+        if (this.isAdmin(id) || this.isOwner(id))
+            return true;
+        else
+            return false;
     }
 
 }

@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import com.codewithgaurav.store.validation.UserValidation;
 import com.codewithgaurav.store.validator.ValidRole;
 import io.swagger.v3.oas.annotations.Operation;
@@ -184,20 +183,12 @@ public class UserAuthController {
     @PostMapping("/auth/refresh")
     public ResponseEntity<?> tokenRefresh(@RequestBody Map<String, String> body) {
         Map<String, String> token = new HashMap<>();
-
         String refresh = body.get("refresh");
-        Long id = jwtService.extractId(refresh);
-        if (id != null) {
-            String username = jwtService.extractUsername(refresh);
-            String accessToken = jwtService.generateAccessToken(username, id);
-            String refreshToken = jwtService.generateRefreshToken(username, id);
-            token.put("access", accessToken);
-            token.put("refresh", refreshToken);
-            return ResponseEntity.ok().body(token);
-        }
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ApiResponse<>("User not authenticated", 401, false));
+        Long id = jwtService.extractIdFromToken(refresh);
+        String username = jwtService.extractUsernameFromToken(refresh);
+        token.put("access", jwtService.generateAccessToken(username, id));
+        token.put("refresh", jwtService.generateRefreshToken(username, id));
+        return ResponseEntity.ok().body(token);
     }
 
     @GetMapping(value = "/admin/user/get-all") // admin
@@ -221,71 +212,47 @@ public class UserAuthController {
             @RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) UserRequestDto request,
             @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
 
-        try {
-            String authHeader = httpRequest.getHeader("Authorization");
+        Long id = jwtService.extractId(httpRequest);
 
-            // Check if token is present
-            if (authHeader == null || !authHeader.startsWith("Bearer")) {
-                ApiResponse<Map<String, Object>> response = new ApiResponse<>("User not authenticated", 401, false);
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-
-            String token = authHeader.substring(7);
-            Long id = jwtService.extractId(token);
-
-            // ✅ Save photo
-            String originalFilename = photos.getOriginalFilename();
-            String fileExtension = "";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-
-            String fileName = UUID.randomUUID() + fileExtension;
-            Path uploadPath = Paths.get(System.getProperty("user.dir"), "uploads", "owners");
-
-            try {
-                Files.createDirectories(uploadPath);
-            } catch (IOException e) {
-                throw new RuntimeException("Could not create upload directory", e);
-            }
-
-            File destination = new File(uploadPath.toFile(), fileName);
-            try {
-                photos.transferTo(destination);
-            } catch (IOException e) {
-                System.out.println("error while saving the file");
-                throw new RuntimeException(e.getMessage());
-            }
-
-            // Set the profile image path before saving to DB
-            String imageUrl = "/uploads/owners/" + fileName; // This should be a relative path
-            request.setProfileImageUrl(imageUrl);
-
-            // Save updated data to DB
-            UserEntity updatedOwner = userService.updateOwnerDetails(id, request);
-
-            return ResponseEntity.ok().body(new ApiResponse<>("Profile update successfully", 200, true, updatedOwner));
-
-        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Token expired", 401, false));
-
-        } catch (io.jsonwebtoken.JwtException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Invalid token", 401, false));
+        // ✅ Save photo
+        String originalFilename = photos.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
+
+        String fileName = UUID.randomUUID() + fileExtension;
+        Path uploadPath = Paths.get(System.getProperty("user.dir"), "uploads", "owners");
+
+        try {
+            Files.createDirectories(uploadPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not create upload directory", e);
+        }
+
+        File destination = new File(uploadPath.toFile(), fileName);
+        try {
+            photos.transferTo(destination);
+        } catch (IOException e) {
+            System.out.println("error while saving the file");
+            throw new RuntimeException(e.getMessage());
+        }
+
+        // Set the profile image path before saving to DB
+        String imageUrl = "/uploads/owners/" + fileName; // This should be a relative path
+        request.setProfileImageUrl(imageUrl);
+
+        // Save updated data to DB
+        UserEntity updatedOwner = userService.updateOwnerDetails(id, request);
+
+        return ResponseEntity.ok().body(new ApiResponse<>("Profile update successfully", 200, true, updatedOwner));
     }
 
     @PutMapping(value = "/complete-profile/user", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> userCompleteProfile(
             @RequestPart("data") @Validated(UserValidation.UserCompleteProfileGroup.class) UserEntity request,
             @RequestPart("photos") MultipartFile photos, HttpServletRequest httpRequest) {
-        String authHeader = httpRequest.getHeader("Authorization");
-        // check if token is present
-        if (authHeader == null || !authHeader.startsWith("Bearer")) {
-            ApiResponse<Map<String, Object>> response = new ApiResponse<>("Token not found", 401, false);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractId(token);
+        Long id = jwtService.extractId(httpRequest);
         String originalFilename = photos.getOriginalFilename();
         String fileExtension = "";
         if (originalFilename != null && originalFilename.contains(".")) {
