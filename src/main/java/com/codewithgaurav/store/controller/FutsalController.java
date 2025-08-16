@@ -48,53 +48,47 @@ public class FutsalController {
             HttpServletRequest httpServletRequest) {
         jwtService.isValidAdminOrOwner(httpServletRequest);
         Long id = jwtService.extractId(httpServletRequest);
-        if (id != null) {
-            // Check the futsal with this registration number is registered or not
-            futsalService.isFutsalAlreadyRegistered(request.getRegistrationNumber());
+        futsalService.isFutsalAlreadyRegistered(request.getRegistrationNumber());
+        String registrationImageUrl = futsalService.storeFile(registraionPhoto, "upload/registration");
+        String coverImageUrl = futsalService.storeFile(coverImage, "upload/cover");
+        List<String> imagesUrl = futsalService.storeFiles(images, "upload/images");
+        FutsalResponseDTO futsalResponseDTO = futsalService.saveFutsal(request, id, coverImageUrl, registrationImageUrl,
+                imagesUrl);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>("Futsal Registered successfully", 201, true, futsalResponseDTO));
+    }
 
-            // Store the Registration Photo
-            boolean isRegistrationPhotoStored = futsalService.storeRegistrationPhoto(registraionPhoto, request);
-            if (!isRegistrationPhotoStored)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new ApiResponse<>("Some error occurred while saving the registration photo", 400, false));
-            // Store Cover Images
-            boolean isCoverImageStored = futsalService.storeCoverImage(coverImage, request);
-            if (!isCoverImageStored)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new ApiResponse<>("Some error occurred while saving the cover image", 400, false));
+    @PutMapping(value = "/update/{id}")
+    public ResponseEntity<?> updateFutsal(
+            @PathVariable("id") Long futsalId,
+            @RequestPart(value = "registration_photo", required = false) MultipartFile registraionPhoto,
+            @RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalEntity request,
+            @RequestPart(value = "images", required = false) MultipartFile[] images,
+            @RequestPart(value = "cover_image", required = false) MultipartFile coverImage,
+            HttpServletRequest httpServletRequest) {
+        jwtService.isValidAdminOrOwner(httpServletRequest);
+        FutsalEntity existingData = futsalService.getFutsalById(futsalId);
+        if (registraionPhoto != null && !registraionPhoto.isEmpty()) {
+            futsalService.deleteFile(existingData.getRegistrationPhoto());
+            String registrationImageUrl = futsalService.storeFile(registraionPhoto, "upload/registration");
+            existingData.setRegistrationPhoto(registrationImageUrl);
+        }
+        if (coverImage != null && !coverImage.isEmpty()) {
+            futsalService.deleteFile(existingData.getCoverImage());
+            String coverImageUrl = futsalService.storeFile(coverImage, "upload/cover");
+            existingData.setCoverImage(coverImageUrl);
+        }
+        if (images != null && images.length > 0 && existingData.getImages() != null) {
+            for (FutsalImages futsalImages : existingData.getImages())
+                futsalService.deleteFile(futsalImages.getImageUrl());
+            existingData.getImages().clear();
+            List<String> imagesUrl = futsalService.storeFiles(images, "upload/images");
+            futsalService.saveImagesUrl(existingData, imagesUrl);
+        }
+        FutsalResponseDTO futsalResponseDTO = futsalService.updateFutsal(request, existingData);
+        return ResponseEntity.ok().body(
+                new ApiResponse<>("Futsal updated successfully", 200, true, futsalResponseDTO));
 
-            // Store the Multiple Images
-            boolean isImagesStored = futsalService.storeMultipleImages(images, request);
-            if (!isImagesStored)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new ApiResponse<>("Some error occurred while saving the images", 400, false));
-
-            // Store the Futsal Data JSON
-            boolean isDataStored = futsalService.registerFutsalDetailsWithOwnerId(request, id);
-            if (!isDataStored)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new ApiResponse<>("some Error occured while saving the data", 400, false));
-            FutsalResponseDTO dto = new FutsalResponseDTO();
-            dto.setId(request.getId());
-            dto.setName(request.getName());
-            dto.setCity(request.getCity());
-            dto.setDistrict(request.getDistrict());
-            dto.setRegistrationNumber(request.getRegistrationNumber());
-            dto.setRegistrationPhoto(request.getRegistrationPhoto());
-            dto.setCoverImage(request.getCoverImage());
-            dto.setLatitude(request.getLatitude());
-            dto.setLongitude(request.getLongitude());
-            List<String> imageUrls = request.getImages().stream()
-                    .map(FutsalImages::getImageUrl)
-                    .toList();
-            dto.setImages(imageUrls);
-
-            // Data successfully store to databse
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponse<>("Futsal Registered successfully", 200, true, dto));
-        } else
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ApiResponse<>("You don't have permission to perform this action", 403, false));
     }
 
     // get the futsal
@@ -103,8 +97,6 @@ public class FutsalController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String search) {
-
-        // Validate the page and pageSize
         if (page < 0 || pageSize <= 0) {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse<>("page or page size is not valid", 400, false));
@@ -113,11 +105,8 @@ public class FutsalController {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse<>("page size exceed the limit", 400, false));
         }
-
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<FutsalResponseDTO> futsalPage = futsalService.getFilterFutsal(search, pageable);
-
-        // Java will automatically infer the type of response
         var response = new PaginatedResponse<>(
                 futsalPage.getContent(),
                 futsalPage.getNumber(),
@@ -174,56 +163,6 @@ public class FutsalController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ApiResponse<>("Permission Not Allowed", 401, false));
-        }
-    }
-
-    // update the futsal
-    @PutMapping(value = "/update/{id}")
-    public ResponseEntity<?> updateFutsalById(
-            @RequestPart(value = "registration_photo", required = false) MultipartFile registraionPhoto,
-            @RequestPart("data") @Validated(FutsalValidation.FutsalRegister.class) FutsalEntity request,
-            @RequestPart(value = "images", required = false) MultipartFile[] images,
-            @RequestPart(value = "cover_image", required = false) MultipartFile coverImage,
-            @PathVariable("id") Long futsalId,
-            HttpServletRequest httpServletRequest) {
-        long ownerId = jwtService.extractValidOwnerId(httpServletRequest);
-        if (ownerId > 0) {
-            // Delete Images if user has uploaded new images
-            if (images != null && images.length > 0) {
-                futsalService.deleteFutsalImagesByFutsalId(futsalId);
-            }
-            if (coverImage != null && !coverImage.isEmpty()) {
-                futsalService.deleteCoverImageByFutsalId(futsalId);
-            }
-            // Store Cover Images
-            if (coverImage != null && !coverImage.isEmpty()) {
-                boolean isCoverImageStored = futsalService.storeCoverImage(coverImage, request);
-                if (!isCoverImageStored) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(new ApiResponse<>("Some error occurred while saving the cover image", 400, false));
-                }
-            }
-
-            // Store the Multiple Images
-            if (images != null && images.length > 0) {
-                boolean isImagesStored = futsalService.storeMultipleImages(images, request);
-                if (!isImagesStored)
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(new ApiResponse<>("Some error occurred while saving the images", 400, false));
-            }
-
-            FutsalEntity futsal = futsalService.updateFutsalById(request, futsalId);
-            FutsalResponseDTO futsalDto = futsalService.convertToFutsalDto(futsal);
-            if (futsal != null)
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ApiResponse<>("Futsal Updated successfully", 200, true, futsalDto));
-            else
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new ApiResponse<>("some Error occured while saving the data", 400, false));
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ApiResponse<>("Permission Not Allowed", 401, false));
-
         }
     }
 

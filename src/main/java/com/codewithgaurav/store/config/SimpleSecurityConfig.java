@@ -22,7 +22,7 @@ public class SimpleSecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/api/**",
-                                "/uploads/**",
+                                "/upload/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
