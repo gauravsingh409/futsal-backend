@@ -1,12 +1,19 @@
 package com.codewithgaurav.store.services;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import com.codewithgaurav.store.dto.response.TimeSlotResponseDto;
+import com.codewithgaurav.store.entity.FutsalEntity;
 import com.codewithgaurav.store.entity.TimeSlotEntity;
 import com.codewithgaurav.store.exception.ResourceNotFoundException;
+import com.codewithgaurav.store.mapper.TimeSlotMapper;
 import com.codewithgaurav.store.repository.FutsalRepository;
 import com.codewithgaurav.store.repository.TimeSlotRepository;
 
@@ -19,13 +26,24 @@ public class TimeSlotService {
    @Autowired
    private FutsalRepository futsalRepo;
 
+   @Autowired
+   private TimeSlotMapper timeSlotMapper;
+
    // Save the time slot
-   public TimeSlotEntity createTimeSlot(TimeSlotEntity timeSlot) {
+   public TimeSlotEntity createTimeSlot(TimeSlotEntity timeSlot, Long futsalId) {
+      FutsalEntity futsal = futsalRepo.findById(futsalId).get();
       try {
+         timeSlot.setFutsal(futsal);
          return timeSlotRepo.save(timeSlot);
       } catch (Exception e) {
          throw new RuntimeException("Failed to save time slot: " + e.getMessage());
       }
+   }
+
+   // get the duration
+   public Long getTimeDuration(LocalTime starTime, LocalTime endTime) {
+      Duration duration = Duration.between(starTime, endTime);
+      return duration.toMinutes();
    }
 
    // get the time slot
@@ -36,11 +54,16 @@ public class TimeSlotService {
       return timeSlotRepo.findByFutsalId(futsalId);
    }
 
+   public Page<TimeSlotEntity> getPaginatedTimeSlotList(String search, Long futsalId, Pageable pageable) {
+      return timeSlotRepo.findByPriceAndFutsalId(search, futsalId, pageable);
+   }
+
    // Is Futsal TimeSlot exist
-   public boolean isTimeSlotExist(Long futsalId, LocalTime startTime, LocalTime endTime) {
-      System.out.println("startTime " + startTime);
-      System.out.println("endTime " + endTime);
-      return timeSlotRepo.existsByFutsalIdAndStartTime(futsalId, startTime);
+   public boolean isSlotOverlap(LocalTime starTime, LocalTime endTime, Long userId) {
+      List<TimeSlotEntity> timeSlotList = this.getSlotsByFutsal(userId);
+      boolean isOverlap = timeSlotList.stream()
+            .anyMatch(slot -> starTime.isBefore(slot.getEndTime()) && slot.getStartTime().isBefore(endTime));
+      return isOverlap;
    }
 
    // get details by id
@@ -51,15 +74,11 @@ public class TimeSlotService {
 
    // Time SLot Put Update
    public TimeSlotEntity putUpdate(TimeSlotEntity request, Long timeSlotId) {
-      Optional<TimeSlotEntity> existingOptional = timeSlotRepo.findById(timeSlotId);
-      if (existingOptional.isEmpty())
-         throw new ResourceNotFoundException("Time Slot with Id " + timeSlotId + "not found");
-      // Update the data
-      existingOptional.get().setStartTime(request.getStartTime());
-      existingOptional.get().setEndTime(request.getEndTime());
-      existingOptional.get().setPrice(request.getPrice());
-      timeSlotRepo.save(existingOptional.get());
-      return existingOptional.get();
+      TimeSlotEntity existingData = this.getDetailsById(timeSlotId);
+      existingData.setStartTime(request.getStartTime());
+      existingData.setEndTime(request.getEndTime());
+      existingData.setPrice(request.getPrice());
+      return timeSlotRepo.save(existingData);
    }
 
    // Delete Time Slot
@@ -69,6 +88,16 @@ public class TimeSlotService {
          return true;
       }
       return false;
+   }
+
+   // conver to dto
+   public TimeSlotResponseDto convertToDto(TimeSlotEntity timeSlotEntity) {
+      return timeSlotMapper.toDto(timeSlotEntity);
+   }
+
+   // convert timeslot list to dto
+   public List<TimeSlotResponseDto> convertEntityPageToDto(Page<TimeSlotEntity> timeSlotPage) {
+      return timeSlotPage.stream().map(timeSlotMapper::toDto).toList();
    }
 
 }

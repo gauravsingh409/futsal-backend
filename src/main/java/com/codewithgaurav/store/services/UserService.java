@@ -27,6 +27,12 @@ public class UserService {
         return this.convertToUserDto(owner);
     }
 
+    public UserEntity getUserDetailsById(Long id) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("user", "id", id));
+        return user;
+    }
+
     public UserEntity updateUserProfile(Long id, UserEntity request) throws RuntimeException {
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));

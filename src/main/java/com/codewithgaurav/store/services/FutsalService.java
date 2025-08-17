@@ -280,4 +280,9 @@ public class FutsalService {
         return futsals.stream().map(this::convertToFutsalDto).toList();
     }
 
+    // Is futsal exist to specific user or not
+    public boolean existByUserIdAndFutsalId(Long futsalId, Long userId) {
+        return futsalRepo.existsByIdAndUser_Id(futsalId, userId);
+    }
+
 }

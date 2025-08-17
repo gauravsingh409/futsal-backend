@@ -46,4 +46,6 @@ public interface FutsalRepository extends JpaRepository<FutsalEntity, Long> {
             @Param("userLng") Double userLng,
             @Param("radius") int radius);
 
+    boolean existsByIdAndUser_Id(Long futsalId, Long userId);
+
 }
