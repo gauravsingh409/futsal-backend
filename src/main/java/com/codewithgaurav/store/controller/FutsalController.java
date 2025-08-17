@@ -88,7 +88,6 @@ public class FutsalController {
         FutsalResponseDTO futsalResponseDTO = futsalService.updateFutsal(request, existingData);
         return ResponseEntity.ok().body(
                 new ApiResponse<>("Futsal updated successfully", 200, true, futsalResponseDTO));
-
     }
 
     // get the futsal

@@ -11,31 +11,21 @@ public class TimeSlotEntity {
    @GeneratedValue(strategy = GenerationType.IDENTITY)
    private Long id;
 
-   @Column(name = "futsal_id", nullable = false)
-   private Long futsalId;
    private LocalTime startTime;
    private LocalTime endTime;
    private Double price;
 
-   @Column(name = "is_booked")
-   private boolean isBooked = false;
+   @ManyToOne
+   @JoinColumn(name = "futsal_id", nullable = false)
+   private FutsalEntity futsal;
 
    // Getters and Setters
-
    public Long getId() {
       return id;
    }
 
    public void setId(Long id) {
       this.id = id;
-   }
-
-   public Long getFutsalId() {
-      return futsalId;
-   }
-
-   public void setFutsalId(Long futsalId) {
-      this.futsalId = futsalId;
    }
 
    public LocalTime getStartTime() {
@@ -62,11 +52,11 @@ public class TimeSlotEntity {
       this.price = price;
    }
 
-   public boolean isBooked() {
-      return isBooked;
+   public FutsalEntity getFutsal() {
+      return futsal;
    }
 
-   public void setBooked(boolean booked) {
-      isBooked = booked;
+   public void setFutsal(FutsalEntity futsal) {
+      this.futsal = futsal;
    }
 }
