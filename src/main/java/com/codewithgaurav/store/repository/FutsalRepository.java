@@ -1,10 +1,7 @@
 package com.codewithgaurav.store.repository;
 
 import com.codewithgaurav.store.entity.FutsalEntity;
-
-import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,7 +26,7 @@ public interface FutsalRepository extends JpaRepository<FutsalEntity, Long> {
     @Query(value = """
             SELECT *
             FROM (
-                SELECT *,
+                SELECT f.*,
                     (6371 * acos(
                         cos(radians(:userLat)) * cos(radians(f.latitude)) *
                         cos(radians(f.longitude) - radians(:userLng)) +
@@ -39,12 +36,24 @@ public interface FutsalRepository extends JpaRepository<FutsalEntity, Long> {
             ) AS futsal_with_distance
             WHERE distance <= :radius
             ORDER BY distance
-            LIMIT 3
+            """, countQuery = """
+            SELECT COUNT(*)
+            FROM (
+                SELECT f.id,
+                    (6371 * acos(
+                        cos(radians(:userLat)) * cos(radians(f.latitude)) *
+                        cos(radians(f.longitude) - radians(:userLng)) +
+                        sin(radians(:userLat)) * sin(radians(f.latitude))
+                    )) AS distance
+                FROM futsals f
+            ) AS futsal_with_distance
+            WHERE distance <= :radius
             """, nativeQuery = true)
-    List<FutsalEntity> findFutsalsWithinRadius(
+    Page<FutsalEntity> findFutsalsWithinRadius(
             @Param("userLat") Double userLat,
             @Param("userLng") Double userLng,
-            @Param("radius") int radius);
+            @Param("radius") int radius,
+            Pageable pageable);
 
     boolean existsByIdAndUser_Id(Long futsalId, Long userId);
 

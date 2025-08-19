@@ -95,7 +95,10 @@ public class FutsalController {
     public ResponseEntity<?> getFutsals(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String search) {
+            @RequestParam(required = false) String search,
+            @RequestParam(value = "latitude", required = false) Double latitude,
+            @RequestParam(value = "longitude", required = false) Double longitude,
+            @RequestParam(value = "radius", required = false) Integer radius) {
         if (page < 0 || pageSize <= 0) {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse<>("page or page size is not valid", 400, false));
@@ -105,7 +108,9 @@ public class FutsalController {
                     .body(new ApiResponse<>("page size exceed the limit", 400, false));
         }
         Pageable pageable = PageRequest.of(page, pageSize);
-        Page<FutsalResponseDTO> futsalPage = futsalService.getFilterFutsal(search, pageable);
+
+        Page<FutsalResponseDTO> futsalPage = futsalService.getFilterFutsal(search, latitude, longitude, radius,
+                pageable);
         var response = new PaginatedResponse<>(
                 futsalPage.getContent(),
                 futsalPage.getNumber(),
@@ -178,15 +183,17 @@ public class FutsalController {
         return ResponseEntity.ok().body(new ApiResponse<>());
     }
 
-    // Get the futsal based on the location
-    @GetMapping(value = "/get/specific")
-    public ResponseEntity<?> getLocationBasedFutsal(HttpServletRequest httpServletRequest,
-            @RequestParam("latitude") double latitude,
-            @RequestParam("longitude") double longitude,
-            @RequestParam("radius") int radius) {
-        jwtService.extractValidUserId(httpServletRequest);
-        List<FutsalResponseDTO> futsals = futsalService.getNearByFutsals(latitude, longitude, radius);
-        return ResponseEntity.ok()
-                .body(new ApiResponse<>("Futsal retrived successfully", 200, true, futsals));
-    }
+    // // Get the futsal based on the location
+    // @GetMapping(value = "/get/specific")
+    // public ResponseEntity<?> getLocationBasedFutsal(HttpServletRequest
+    // httpServletRequest,
+    // @RequestParam("latitude") double latitude,
+    // @RequestParam("longitude") double longitude,
+    // @RequestParam("radius") int radius) {
+    // jwtService.extractValidUserId(httpServletRequest);
+    // List<FutsalResponseDTO> futsals = futsalService.getNearByFutsals(latitude,
+    // longitude, radius);
+    // return ResponseEntity.ok()
+    // .body(new ApiResponse<>("Futsal retrived successfully", 200, true, futsals));
+    // }
 }
