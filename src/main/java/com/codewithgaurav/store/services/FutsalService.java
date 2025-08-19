@@ -47,9 +47,9 @@ public class FutsalService {
         return user.get().isOwner();
     }
 
-    public FutsalEntity getFutsalById(Long id) {
-        return futsalRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Futsal with id " + id + " not found!"));
+    public FutsalEntity getFutsalById(Long futsaId) {
+        return futsalRepo.findById(futsaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Futsal with id " + futsaId + " not found!"));
     }
 
     public String storeFile(MultipartFile file, String path) {
@@ -240,9 +240,13 @@ public class FutsalService {
     }
 
     // Get Futsal List
-    public Page<FutsalResponseDTO> getFilterFutsal(String search, Pageable pageable) {
+    public Page<FutsalResponseDTO> getFilterFutsal(String search, Double latitude, Double longitude,
+            Integer radius, Pageable pageable) {
         Page<FutsalEntity> futsalPage;
-        futsalPage = futsalRepo.findByNameContainingIgnoreCase(search, pageable);
+        if (latitude == null)
+            futsalPage = futsalRepo.findByNameContainingIgnoreCase(search, pageable);
+        else
+            futsalPage = futsalRepo.findFutsalsWithinRadius(latitude, longitude, radius, pageable);
         return futsalPage.map(futsalMapper::toDto);
     }
 
@@ -274,15 +278,15 @@ public class FutsalService {
         return futsalMapper.toDto(futsal);
     }
 
-    // Get the futsal based on longitude and latitude
-    public List<FutsalResponseDTO> getNearByFutsals(Double latitude, Double longitude, int radius) {
-        List<FutsalEntity> futsals = futsalRepo.findFutsalsWithinRadius(latitude, longitude, radius);
-        return futsals.stream().map(this::convertToFutsalDto).toList();
-    }
-
     // Is futsal exist to specific user or not
     public boolean existByUserIdAndFutsalId(Long futsalId, Long userId) {
         return futsalRepo.existsByIdAndUser_Id(futsalId, userId);
+    }
+
+    // get user by futsal id
+    public UserEntity getUserByFutsalId(Long futsalId) {
+        FutsalEntity futsalEntity = this.getFutsalById(futsalId);
+        return futsalEntity.getUser();
     }
 
 }
