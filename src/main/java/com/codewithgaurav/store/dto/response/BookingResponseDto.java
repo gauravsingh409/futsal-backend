@@ -1,12 +1,13 @@
 package com.codewithgaurav.store.dto.response;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class BookingResponseDto {
     private Long id;
     private String customerName;
     private String phone;
-    private LocalDateTime bookedDate;
+    private LocalDate bookedDate;
     private String status;
     private LocalDateTime createAt;
     private boolean isPaid;
@@ -39,11 +40,11 @@ public class BookingResponseDto {
         this.phone = phone;
     }
 
-    public LocalDateTime getBookedDate() {
+    public LocalDate getBookedDate() {
         return bookedDate;
     }
 
-    public void setBookedDate(LocalDateTime bookedDate) {
+    public void setBookedDate(LocalDate bookedDate) {
         this.bookedDate = bookedDate;
     }
 

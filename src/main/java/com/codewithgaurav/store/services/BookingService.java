@@ -2,6 +2,9 @@ package com.codewithgaurav.store.services;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.codewithgaurav.store.dto.response.BookingResponseDto;
 import com.codewithgaurav.store.entity.BookingEntity;
@@ -32,15 +35,28 @@ public class BookingService {
         return bookingRepository.save(request);
     }
 
+    // User Booking
+    public Page<BookingEntity> getUserBooking(Long id, Pageable pageable) {
+        return bookingRepository.findByUser_Id(id, pageable);
+    }
+
+    // Owner Booking
+    public Page<BookingEntity> getOwnerBooking(Long id, Pageable pageable) {
+        return bookingRepository.findByOwner_Id(id, pageable);
+    }
+
     // convert toDto
     public BookingResponseDto converToDto(BookingEntity bookingEntity) {
         return bookingMapper.toDto(bookingEntity);
     }
 
+    // convert page to dto page
+    public Page<BookingResponseDto> convertPageToDto(Page<BookingEntity> page) {
+        return page.map(this::converToDto);
+    }
+
     // is already booked
     public boolean isAlreadyBooked(Long futsalId, LocalDate bookedDate, LocalTime bookedTime) {
-        System.out.println("Futsal id " + futsalId);
-        System.out.println("Booked date " + bookedDate);
         return bookingRepository.existsByFutsal_IdAndBookedDateAndBookedTime(futsalId, bookedDate, bookedTime);
     }
 }

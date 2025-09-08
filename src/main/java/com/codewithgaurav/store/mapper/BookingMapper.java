@@ -9,6 +9,7 @@ import com.codewithgaurav.store.entity.BookingEntity;
 @Mapper(componentModel = "spring", uses = { FutsalMapper.class, UserMapper.class })
 public abstract class BookingMapper {
 
+    @Mapping(source = "bookedDate", target = "bookedDate")
     @Mapping(source = "user", target = "user")
     @Mapping(source = "futsal", target = "futsal")
     @Mapping(source = "owner", target = "owner")

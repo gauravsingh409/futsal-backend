@@ -41,7 +41,8 @@ public class SimpleSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://988xn8kn-3000.inc1.devtunnels.ms/"));
+        config.setAllowedOrigins(
+                List.of("http://localhost:3000", "http://localhost:3001", "https://988xn8kn-3000.inc1.devtunnels.ms/"));
         // config.setAllowedOrigins(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
