@@ -301,4 +301,12 @@ public class UserAuthController {
             return ResponseEntity.ok().body(new ApiResponse<>("User with id " + userId + " not found", 400, false));
     }
 
+    @GetMapping(path = "/auth/me")
+    public ResponseEntity<?> getLoggedInUser(HttpServletRequest httpServletRequest) {
+        long id = jwtService.extractId(httpServletRequest);
+        UserEntity user = userService.getUserDetailsById(id);
+        return ResponseEntity.ok().body(new ApiResponse<>("user retrieved successfully", 200, true,
+                Map.of("id", user.getId(), "username", user.getUsername())));
+    }
+
 }
