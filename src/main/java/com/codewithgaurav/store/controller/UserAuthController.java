@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import com.codewithgaurav.store.validation.UserValidation;
@@ -305,8 +306,14 @@ public class UserAuthController {
     public ResponseEntity<?> getLoggedInUser(HttpServletRequest httpServletRequest) {
         long id = jwtService.extractId(httpServletRequest);
         UserEntity user = userService.getUserDetailsById(id);
-        return ResponseEntity.ok().body(new ApiResponse<>("user retrieved successfully", 200, true,
-                Map.of("id", user.getId(), "username", user.getUsername())));
-    }
+        Map<String, Object> data = new LinkedHashMap<>() {
+            {
+                put("id", user.getId());
+                put("username", user.getUsername());
+                put("profile", user.getProfilePicture());
 
+            }
+        };
+        return ResponseEntity.ok().body(new ApiResponse<>("user retrieved successfully", 200, true, data));
+    }
 }
