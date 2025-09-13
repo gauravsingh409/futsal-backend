@@ -19,10 +19,10 @@ public class ChatController {
 
     @MessageMapping("/chat.sendMessage") // Similar to post mapping in rest, but for web STOMP message
     public void sendMessage(MessageEntity message) {
-        // 1️⃣ Save message to DB
+        // Save message to DB
         MessageEntity savedMessage = chatService.saveMessage(message);
 
-        // 2️⃣ Broadcast to conversation topic
+        // Broadcast to conversation topic
         messagingTemplate.convertAndSend(
                 "/topic/conversations/" + message.getConversation().getId(),
                 savedMessage);

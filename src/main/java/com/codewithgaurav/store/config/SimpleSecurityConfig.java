@@ -26,7 +26,8 @@ public class SimpleSecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**")
+                                "/webjars/**",
+                                "/ws/**")
                         .permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form.disable());
