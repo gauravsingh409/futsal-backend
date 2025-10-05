@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -104,8 +107,22 @@ public class UserAuthController {
         return ResponseEntity.ok("ok");
     }
 
-    @GetMapping(path = "/auth/me")
-    public ResponseEntity<?> getLoggedInUser(HttpServletRequest httpServletRequest) {
-        return ResponseEntity.ok("ok");
+    @GetMapping("/auth/me")
+    public ResponseEntity<?> getLoggedInUser() {
+        // Get the authentication object
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt jwt)) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        // extract claims from the JWT
+        Map<String, Object> userInfo = Map.of(
+                "keycloakId", jwt.getClaim("sub"),
+                "email", jwt.getClaim("email"),
+                "name", jwt.getClaim("name"),
+                "emailVerified", jwt.getClaim("email_verified")
+        );
+        return ResponseEntity.ok(ApiResponse.builder().message("User details fetched").code(200).data(userInfo).success(true).build());
     }
 }
