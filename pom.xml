@@ -93,27 +93,11 @@
             <artifactId>postgresql</artifactId>
         </dependency>
 
-        <!-- Map Struct -->
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-            <version>1.5.5.Final</version>
-        </dependency>
-
         <!-- Socket -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
-
-        <!--  Keycloak client      -->
-        <!-- https://mvnrepository.com/artifact/org.keycloak/keycloak-admin-client -->
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-admin-client</artifactId>
-            <version>26.0.7</version>
-        </dependency>
-
 
         <!--lombok, provided scope mean only needed at compile time-->
         <dependency>

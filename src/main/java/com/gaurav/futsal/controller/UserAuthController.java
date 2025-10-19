@@ -18,8 +18,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -31,13 +33,6 @@ public class UserAuthController {
     private final UserRepository userRepository;
     private final UserService userService;
 
-
-    @PostMapping("/public/auth/user/register")
-    public ResponseEntity<?> registerUser(
-            @Validated(UserValidation.UserRegisterGroup.class) @RequestBody UserEntity request) {
-        UserDto savedUser = userService.createUser(request);
-        return ResponseEntity.ok(ApiResponse.builder().code(200).message("User register successfully").data(savedUser));
-    }
 
     @PostMapping("/auth/login")
     public ResponseEntity<?> authenticateUser(
@@ -62,10 +57,6 @@ public class UserAuthController {
         return ResponseEntity.ok("ok");
     }
 
-    @PostMapping("/auth/refresh")
-    public ResponseEntity<?> tokenRefresh(@RequestBody Map<String, String> body) {
-        return ResponseEntity.ok().body("ok");
-    }
 
     @GetMapping(value = "/admin/user/get-all") // admin
     public ResponseEntity<?> getAllUser(
