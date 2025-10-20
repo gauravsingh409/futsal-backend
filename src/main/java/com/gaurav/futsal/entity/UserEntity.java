@@ -1,11 +1,13 @@
 package com.gaurav.futsal.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Table(name = "users")
 @Data
+@Builder
 public class UserEntity {
 
     @Id

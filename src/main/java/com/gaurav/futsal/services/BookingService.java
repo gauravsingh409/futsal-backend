@@ -23,7 +23,7 @@ public class BookingService {
 
     // Save the booking
     public BookingEntity saveBooking(BookingEntity request, Long futsalId, Long userId) {
-        request.setUser(new UserEntity());
+//        request.setUser(new UserEntity());
         request.setFutsal(futsalService.getFutsalById(futsalId));
         request.setOwner(futsalService.getUserByFutsalId(futsalId));
         return bookingRepository.save(request);

@@ -1,5 +1,6 @@
 package com.gaurav.futsal.controller;
 
+import com.gaurav.futsal.dto.request.UserRegisterRequestDto;
 import com.gaurav.futsal.dto.request.UserRequestDto;
 import com.gaurav.futsal.dto.response.UserResponseDto;
 import com.gaurav.futsal.entity.UserEntity;
@@ -40,12 +41,16 @@ public class UserAuthController {
         return ResponseEntity.ok(new ApiResponse<UserResponseDto>("user details retrieved", 200, true, userResponseDto, null));
     }
 
+    @PostMapping("/auth/user/register")
+    public ResponseEntity<?> registerUser(@RequestBody UserRegisterRequestDto request) {
+        UserResponseDto savedUser = userService.registerUser(request);
+        return ResponseEntity.ok(new ApiResponse<UserResponseDto>("User saved successfully", 200, true, savedUser, null));
+    }
+
 
     @PostMapping("/auth/login")
     public ResponseEntity<?> authenticateUser(
             @Validated(UserValidation.UserLoginGroup.class) @RequestBody UserEntity userAuthDTO) {
-
-        // Return Token
         return ResponseEntity.ok("ok");
     }
 
