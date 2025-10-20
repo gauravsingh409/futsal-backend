@@ -1,7 +1,7 @@
 package com.gaurav.futsal.controller;
 
 import com.gaurav.futsal.dto.request.UserRequestDto;
-import com.gaurav.futsal.dto.response.UserDto;
+import com.gaurav.futsal.dto.response.UserResponseDto;
 import com.gaurav.futsal.entity.UserEntity;
 import com.gaurav.futsal.payload.ApiResponse;
 import com.gaurav.futsal.repository.UserRepository;
@@ -18,10 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -32,6 +30,15 @@ public class UserAuthController {
 
     private final UserRepository userRepository;
     private final UserService userService;
+
+
+    @GetMapping("/user/exist")
+    public ResponseEntity<?> isUserExist(
+            @RequestParam() String email
+    ) {
+        UserResponseDto userResponseDto = userService.getUserDetails(email);
+        return ResponseEntity.ok(new ApiResponse<UserResponseDto>("user details retrieved", 200, true, userResponseDto, null));
+    }
 
 
     @PostMapping("/auth/login")

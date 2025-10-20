@@ -5,12 +5,8 @@ import lombok.Data;
 
 @Data
 @Builder
-public class UserDto {
-    private String keyCloakId;
-    private String username;
+public class UserResponseDto {
     private String email;
-    private boolean emailVerified;
     private String firstName;
     private String lastName;
-    private String fullName;
 }

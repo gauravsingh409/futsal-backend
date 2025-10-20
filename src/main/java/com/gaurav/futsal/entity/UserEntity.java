@@ -15,10 +15,12 @@ public class UserEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
-    private String given_name;
+    private String first_name;
 
-    private String family_name;
+    private String last_name;
 
     private String profile;
+
+    private String provider_name;
 }
 
