@@ -28,7 +28,7 @@ public class UserService {
 
     private UserResponseDto userEntityToUserResponseDto(UserEntity user) {
         if (user == null) return null;
-        return UserResponseDto.builder().email(user.getEmail()).firstName(user.getFirst_name()).lastName(user.getLast_name()).build();
+        return UserResponseDto.builder().email(user.getEmail()).firstName(user.getFirst_name()).lastName(user.getLast_name()).profile(user.getProfile()).build();
     }
 
 }
