@@ -19,6 +19,7 @@ public class UserService {
         return this.userEntityToUserResponseDto(user);
     }
 
+    //    Register User
     public UserResponseDto registerUser(UserRegisterRequestDto request) {
         UserEntity user = UserEntity.builder()
                 .email(request.getEmail())
@@ -34,9 +35,27 @@ public class UserService {
     }
 
 
+    public UserResponseDto registerOwner(UserRegisterRequestDto request) {
+        UserEntity user = UserEntity.builder()
+                .email(request.getEmail())
+                .first_name(request.getFirstName())
+                .last_name(request.getLastName())
+                .profile(request.getProfile())
+                .provider("google".equals(request.getProvider()) ? UserEntity.AuthProvider.GOOGLE : UserEntity.AuthProvider.LOCAL)
+                .role(UserEntity.UserRole.OWNER)
+                .build();
+
+        UserEntity savedUser = userRepository.save(user);
+        return this.userEntityToUserResponseDto(savedUser);
+    }
+
     private UserResponseDto userEntityToUserResponseDto(UserEntity user) {
         if (user == null) return null;
-        return UserResponseDto.builder().email(user.getEmail()).firstName(user.getFirst_name()).lastName(user.getLast_name()).profile(user.getProfile()).build();
+        return UserResponseDto.builder()
+                .email(user.getEmail())
+                .firstName(user.getFirst_name())
+                .lastName(user.getLast_name()).profile(user.getProfile())
+                .build();
     }
 
 }

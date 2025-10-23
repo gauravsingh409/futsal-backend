@@ -47,6 +47,12 @@ public class UserAuthController {
         return ResponseEntity.ok(new ApiResponse<UserResponseDto>("User saved successfully", 200, true, savedUser, null));
     }
 
+    @PostMapping("/auth/owner/register")
+    public ResponseEntity<?> registerOwner(@RequestBody UserRegisterRequestDto request) {
+        UserResponseDto savedUser = userService.registerOwner(request);
+        return ResponseEntity.ok(new ApiResponse<UserResponseDto>("Owner register successfully", 200, true, savedUser, null));
+    }
+
 
     @PostMapping("/auth/login")
     public ResponseEntity<?> authenticateUser(
@@ -54,13 +60,7 @@ public class UserAuthController {
         return ResponseEntity.ok("ok");
     }
 
-    @PostMapping("/auth/owner/register")
-    public ResponseEntity<?> registerFutsal(
-            @Validated(UserValidation.OwnerRegisterGroup.class) @RequestBody UserRequestDto request) {
 
-
-        return ResponseEntity.ok("ok");
-    }
 
     @PostMapping("/auth/owner/login")
     public ResponseEntity<?> loginFootsal(
