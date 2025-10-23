@@ -20,7 +20,15 @@ public class UserService {
     }
 
     public UserResponseDto registerUser(UserRegisterRequestDto request) {
-        UserEntity user = UserEntity.builder().email(request.getEmail()).first_name(request.getFirstName()).last_name(request.getLastName()).profile(request.getProfile()).provider_name(request.getProvider()).build();
+        UserEntity user = UserEntity.builder()
+                .email(request.getEmail())
+                .first_name(request.getFirstName())
+                .last_name(request.getLastName())
+                .profile(request.getProfile())
+                .provider("google".equals(request.getProvider()) ? UserEntity.AuthProvider.GOOGLE : UserEntity.AuthProvider.LOCAL)
+                .role(UserEntity.UserRole.USER)
+                .build();
+
         UserEntity savedUser = userRepository.save(user);
         return this.userEntityToUserResponseDto(savedUser);
     }
