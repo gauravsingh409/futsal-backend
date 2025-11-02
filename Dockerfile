@@ -5,7 +5,7 @@ FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 
 # Copy the project jar (replace with your jar name)
-COPY target/futsal-backend-0.0.1-SNAPSHOT.jar app.jar
+COPY target/futsal-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose port 8080 (or your Spring Boot server.port)
 EXPOSE 8080
